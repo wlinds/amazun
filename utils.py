@@ -18,9 +18,6 @@ def validate_isbn(n):
                + sum(int(ch) * 3 for ch in n[1::2]))
     return product % 10 == 0
 
-
-
-
 # Vy: ”TitlarPerFörfattare”
 def titles_by_author():
     conn = sqlite3.connect('amazun.db')
@@ -41,4 +38,23 @@ def titles_by_author():
     conn.commit()
     conn.close()
 
-titles_by_author()
+
+# Drop table OR view
+# https://www.sqlitetutorial.net/sqlite-create-view/
+
+def drop_table(name, file_name='amazun.db'):
+    conn = sqlite3.connect(file_name)
+    c = conn.cursor()
+
+    try:
+        c.execute(f"DROP TABLE {name}")
+    except sqlite3.OperationalError:
+        try:
+            c.execute(f"DROP VIEW {name}")
+        except sqlite3.OperationalError:
+            print(f"No table or view named {name} found in database.")
+
+    conn.commit()
+    conn.close()
+
+drop_table('TitlarPerFörfattare')
