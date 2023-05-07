@@ -2,9 +2,12 @@ from sqlalchemy import *
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 # Define database connection
-engine = create_engine('sqlite:///amazun.db')
-Session = sessionmaker(bind=engine)
-Base = declarative_base()
+
+engine = create_engine('sqlite:///amazun.db') # used to communicate with the database and execute SQL statements
+Session = sessionmaker(bind=engine)  # used to manage transactions and interact with the ORM layer of SQLAlchemy
+Base = declarative_base()  # model class represents a table in the database and its attributes represent columns
+
+# Define tables
 
 class Author(Base):
     __tablename__ = 'Author'
