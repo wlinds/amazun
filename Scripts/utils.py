@@ -56,5 +56,3 @@ def drop_table(name, file_name='amazun.db'):
 
     conn.commit()
     conn.close()
-
-drop_table('TitlarPerFörfattare')
