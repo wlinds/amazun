@@ -10,7 +10,7 @@ import sqlite3
 #  Take the remainder of this number after division by  10.
 #  If it is  0,   the ISBN-13 check digit is correct.
 
-def validate_isbn(n):
+def validate_isbn(n: str):
     n = n.replace('-','').replace(' ', '')
     if len(n) != 13:
         return False
