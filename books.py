@@ -65,6 +65,10 @@ def add_book(title, language, price, release_date, author_id, isbn, validate=Fal
         print(f'Added book with ISBN: {isbn} to table.')
 
 def add_to_inventory(isbn, store_id, stock):
+    """
+    Add book to Inventory table.
+    """
+
     session = Session()
     inventory = session.query(Inventory).filter_by(ISBN13=isbn, StoreID=store_id).first()
     if inventory:
@@ -74,12 +78,10 @@ def add_to_inventory(isbn, store_id, stock):
         session.add(inventory)
     session.commit()
 
-
-
-
-
-
 def burn_book(isbn, verbose=False):
+    """
+    Remove book from both Inventory & Book table.
+    """
     session = Session()
 
     try:
@@ -107,16 +109,17 @@ def burn_book(isbn, verbose=False):
 
 
 if __name__ == '__main__':
+    pass
 
     # These functions are still a bit wonky TODO
     
     #burn_book("978012345", verbose=True)
     #add_book('Book7', "English", "12.99", "2023-05-05", 1337, "978012345", validate=True, verbose=True)
 
-    add_to_inventory("9780553801477", 1, 99)
+    #add_to_inventory("9780553801477", 1, 99)
 
-    results = search_books('Hitchhiker')
-    for title, stores in results.items():
-        print(f'Title: {title}')
-        for store_name, copies_available in stores:
-            print(f'    {store_name}: {copies_available} copies available')
+    #results = search_books('Hitchhiker')
+    #for title, stores in results.items():
+    #    print(f'Title: {title}')
+    #    for store_name, copies_available in stores:
+    #        print(f'    {store_name}: {copies_available} copies available')
