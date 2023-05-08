@@ -1,5 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from datetime import datetime
 
 # Define database connection
 
@@ -42,3 +43,26 @@ class Inventory(Base):
     Stock = Column(Integer)
     store = relationship('Store', back_populates='stock')
     book = relationship('Book', back_populates='stock')
+
+class Customer(Base):
+    __tablename__ = 'Cst'
+    ID = Column(Integer, primary_key=True)
+    Name = Column(String)
+    Surname = Column(String)
+    Address = Column(String)
+    City = Column(String)
+    State = Column(String)
+    ZipCode = Column(String)
+    Email = Column(String)
+
+class Transaction(Base):
+    __tablename__ = 'Transactions'
+    id = Column(Integer, primary_key=True)
+    TransactionDate = Column(DateTime, default=datetime.utcnow)
+    CustomerID = Column(Integer, ForeignKey('Cst.ID'))
+    customer = relationship("Customer")
+    ISBN13 = Column(String(13), ForeignKey('Book.ISBN13'))
+    StoreID = Column(Integer)
+    Book = relationship("Book")
+    Quantity = Column(Integer)
+    Total_Cost = Column(Numeric(precision=2))
