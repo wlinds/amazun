@@ -90,6 +90,27 @@ def extend_db(file_name='amazun'):
     conn.commit()
     conn.close()
 
+def create_transaction_table(file_name='amazun'):
+    conn = sqlite3.connect(f'{file_name}.db')
+    c = conn.cursor()
+
+    # Table 8: Store transactions
+    c.execute('''CREATE TABLE Transactions (
+                    ID INTEGER PRIMARY KEY,
+                    ISBN13 TEXT NOT NULL,
+                    StoreID INTEGER NOT NULL,
+                    CustomerID INTEGER NOT NULL,
+                    Quantity INTEGER NOT NULL,
+                    TransactionDate TEXT NOT NULL,
+                    Total_Cost TEXT NOT NULL,
+                    FOREIGN KEY (ISBN13) REFERENCES Book(ISBN13),
+                    FOREIGN KEY (StoreID) REFERENCES Store(ID),
+                    FOREIGN KEY (CustomerID) REFERENCES Cst(ID)
+                    )''')
+
+    conn.commit()
+    conn.close()
+
 if __name__ == "__main__":
 
     main_db = 'amazun.db'
@@ -97,12 +118,13 @@ if __name__ == "__main__":
     if os.path.exists(main_db):
         os.remove(main_db)
         print(f'{main_db} removed')
-    else:
-        print("File does not exist")
 
     create_basic_tables()
     extend_db()
+    create_transaction_table()
     get_dummy_store()
     populate_customer_table()
     get_dummy_orders()
     titles_by_author()
+
+    print('New db successfully created.')
