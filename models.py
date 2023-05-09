@@ -19,62 +19,69 @@ Base = declarative_base()  # model class represents a table in the database and 
 class Author(Base):
     __tablename__ = 'Author'
     ID = Column(Integer, primary_key=True)
-    Name = Column(String)
-    Surname = Column(String)
-    Birthdate = Column(String)
-    books = relationship('Book', back_populates='author')
+    name = Column(String)
+    surname = Column(String)
+    birthdate = Column(String)
+    books = relationship('Books', back_populates='author')
 
-class Book(Base):
-    __tablename__ = 'Book'
-    ISBN13 = Column(String, primary_key=True)
-    Title = Column(String)
-    Language = Column(String)
-    Price = Column(Integer)
-    Release = Column(String)
+class Books(Base):
+    __tablename__ = 'Books'
+    isbn13 = Column(String, primary_key=True)
+    title = Column(String)
+    language = Column(String)
+    price = Column(Integer)
+    release = Column(String)
+    genre = Column(String, nullable=True)
     AuthID = Column(Integer, ForeignKey('Author.ID'))
     author = relationship('Author', back_populates='books')
-    stock = relationship('Inventory', back_populates='book')
+    inventory = relationship('Inventory', back_populates='book')
+
 
 class Store(Base):
     __tablename__ = 'Store'
-    ID = Column(Integer, primary_key=True)
-    Store_Name = Column(String, unique=True)
-    Store_Address = Column(String)
+    id = Column(Integer, primary_key=True)
+    store_name = Column(String, unique=True)
+    store_address = Column(String, unique=True)
     stock = relationship('Inventory', back_populates='store')
+
+    __table_args__ = (
+        UniqueConstraint('store_name'),
+        UniqueConstraint('store_name', 'store_address'),
+    )
 
 class Inventory(Base):
     __tablename__ = 'Inventory'
-    StoreID = Column(Integer, ForeignKey('Store.ID'), primary_key=True)
-    ISBN13 = Column(String, ForeignKey('Book.ISBN13'), primary_key=True)
-    Stock = Column(Integer)
+    StoreID = Column(Integer, ForeignKey('Store.id'), primary_key=True)
+    isbn13 = Column(String, ForeignKey('Books.isbn13'), primary_key=True)
+    stock = Column(Integer)
     store = relationship('Store', back_populates='stock')
-    book = relationship('Book', back_populates='stock')
+    book = relationship('Books', back_populates='inventory')
 
 class Customer(Base):
-    __tablename__ = 'Cst'
+    __tablename__ = 'Customer'
     ID = Column(Integer, primary_key=True)
-    Name = Column(String)
-    Surname = Column(String)
-    Address = Column(String)
-    City = Column(String)
-    State = Column(String)
-    ZipCode = Column(String)
-    Email = Column(String)
+    name = Column(String)
+    surname = Column(String)
+    address = Column(String)
+    city = Column(String)
+    state = Column(String)
+    zipcode = Column(String)
+    email = Column(String)
 
 class CustomerBooks(Base):
     __tablename__ = 'Customer_Books'
-    customer_id = Column(Integer, ForeignKey('Cst.ID'), primary_key=True)
-    book_id = Column(String(13), ForeignKey('Book.ISBN13'), primary_key=True)
+    customer_id = Column(Integer, ForeignKey('Customer.ID'), primary_key=True)
+    book_id = Column(String(13), ForeignKey('Books.isbn13'), primary_key=True)
     copies_owned = Column(Integer, default=0)
 
 class Transaction(Base):
     __tablename__ = 'Transactions'
     id = Column(Integer, primary_key=True)
     TransactionDate = Column(DateTime, default=datetime.utcnow)
-    CustomerID = Column(Integer, ForeignKey('Cst.ID'))
+    CustomerID = Column(Integer, ForeignKey('Customer.ID'))
     customer = relationship("Customer")
-    ISBN13 = Column(String(13), ForeignKey('Book.ISBN13'))
+    ISBN13 = Column(String(13), ForeignKey('Books.isbn13'))
     StoreID = Column(Integer)
-    Book = relationship("Book")
+    Book = relationship("Books")
     Quantity = Column(Integer)
     Total_Cost = Column(Numeric(precision=2))
