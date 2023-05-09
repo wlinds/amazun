@@ -8,7 +8,13 @@ engine = create_engine('sqlite:///amazun.db') # used to communicate with the dat
 Session = sessionmaker(bind=engine)  # used to manage transactions and interact with the ORM layer of SQLAlchemy
 Base = declarative_base()  # model class represents a table in the database and its attributes represent columns
 
-# Define tables
+#TODO:
+# Update to strict naming conventions (snake_case)
+# Reduce redundancy (DRY)
+# Improve constraints
+# Remove declarative_base() (Legacy code)
+
+# Define tables (Old and bulky)
 
 class Author(Base):
     __tablename__ = 'Author'
@@ -32,7 +38,7 @@ class Book(Base):
 class Store(Base):
     __tablename__ = 'Store'
     ID = Column(Integer, primary_key=True)
-    Store_Name = Column(String)
+    Store_Name = Column(String, unique=True)
     Store_Address = Column(String)
     stock = relationship('Inventory', back_populates='store')
 
@@ -54,6 +60,12 @@ class Customer(Base):
     State = Column(String)
     ZipCode = Column(String)
     Email = Column(String)
+
+class CustomerBooks(Base):
+    __tablename__ = 'Customer_Books'
+    customer_id = Column(Integer, ForeignKey('Cst.ID'), primary_key=True)
+    book_id = Column(String(13), ForeignKey('Book.ISBN13'), primary_key=True)
+    copies_owned = Column(Integer, default=0)
 
 class Transaction(Base):
     __tablename__ = 'Transactions'
