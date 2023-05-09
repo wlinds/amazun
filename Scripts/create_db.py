@@ -29,11 +29,7 @@ def create_basic_tables(file_name='amazun'):
                     AuthID INTEGER NOT NULL,
                     FOREIGN KEY (AuthID) REFERENCES Author(ID))''')
 
-    # Table 3: Store
-    c.execute('''CREATE TABLE Store (
-                    ID INTEGER PRIMARY KEY,
-                    Store_Name TEXT NOT NULL,
-                    Store_Address TEXT NOT NULL)''')
+    # Table 3 moved to new function create_store()
 
     # Table 4: Inventory (StoreID and ISBN13 as composite PK)
     c.execute('''CREATE TABLE Inventory (
@@ -43,6 +39,20 @@ def create_basic_tables(file_name='amazun'):
                     PRIMARY KEY (StoreID, ISBN13),
                     FOREIGN KEY (StoreID) REFERENCES Store(ID),
                     FOREIGN KEY (ISBN13) REFERENCES Book(ISBN13))''')
+
+    conn.commit()
+    conn.close()
+
+def create_store(file_name='amazun'):
+
+    conn = sqlite3.connect(f'{file_name}.db')
+    c = conn.cursor()
+
+    # Table 3: Store
+    c.execute('''CREATE TABLE Store (
+                    ID INTEGER PRIMARY KEY,
+                    Store_Name TEXT NOT NULL,
+                    Store_Address TEXT NOT NULL)''')
 
     conn.commit()
     conn.close()
@@ -122,7 +132,9 @@ if __name__ == "__main__":
     create_basic_tables()
     extend_db()
     create_transaction_table()
-    get_dummy_store()
+    
+    #get_dummy_store() # This is now created with add_store() in store_management
+
     populate_customer_table()
     get_dummy_orders()
     titles_by_author()
