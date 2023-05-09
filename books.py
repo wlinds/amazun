@@ -15,19 +15,19 @@ def search_books(search_term):
     """
 
     session = Session()
-    books = (
-        session.query(Book, Inventory, Store)
+    filter_book = (
+        session.query(Books, Inventory, Store)
         .join(Inventory.book)
         .join(Inventory.store)
-        .filter(Book.Title.ilike(f'%{search_term}%'))
+        .filter(Books.title.ilike(f'%{search_term}%'))
         .all()
     )
     results = {}
-    for book, inventory, store in books:
-        if book.Title in results:
-            results[book.Title].append((store.Store_Name, inventory.Stock))
+    for book, inventory, store in filter_book:
+        if book.title in results:
+            results[book.title].append((store.store_name, inventory.stock))
         else:
-            results[book.Title] = [(store.Store_Name, inventory.Stock)]
+            results[book.title] = [(store.store_name, inventory.stock)]
     return results
 
 def add_book(title, language, price, release_date, author_id, isbn, validate=False, verbose=False):
@@ -187,8 +187,12 @@ def get_dummy_authors():
                 print(f"Author '{author_name}' already exists.")
                 session.rollback()
 
+
 if __name__ == '__main__':
-    pass
+    main_db = 'amazun.db'
+
+    Base.metadata.create_all(bind=engine) 
+
 
     # These functions are still a bit wonky TODO
     
