@@ -23,18 +23,22 @@ def titles_by_author():
     conn = sqlite3.connect('amazun.db')
     c = conn.cursor()
 
+    try:
     # Create the view
-    c.execute('''CREATE VIEW TitlarPerFörfattare AS
-                    SELECT Author.Name || ' ' || Author.Surname AS Namn,
-                           strftime('%Y', 'now') - strftime('%Y', Author.Birthdate) AS Ålder,
-                           COUNT(DISTINCT Book.Title) AS Titlar,
-                           SUM(Book.Price * Inventory.Stock) AS Lagervärde
-                    FROM Author
-                    JOIN Book ON Author.ID = Book.AuthID
-                    JOIN Inventory ON Book.ISBN13 = Inventory.ISBN13
-                    GROUP BY Author.Name, Author.Surname
-                    ORDER BY Namn''')
-
+        c.execute('''CREATE VIEW TitlarPerFörfattare AS
+                        SELECT Author.Name || ' ' || Author.surname AS Namn,
+                               strftime('%Y', 'now') - strftime('%Y', Author.birthdate) AS Ålder,
+                               COUNT(DISTINCT Books.title) AS Titlar,
+                               SUM(Books.price * Inventory.stock) AS Lagervärde
+                        FROM Author
+                        JOIN Books ON Author.ID = Books.AuthID
+                        JOIN Inventory ON Books.isbn13 = Inventory.isbn13
+                        GROUP BY Author.name, Author.surname
+                        ORDER BY Namn''')
+        print("View created successfully.")
+    except sqlite3.OperationalError:
+        print("View already exists.")
+        
     conn.commit()
     conn.close()
 
