@@ -8,21 +8,21 @@ def purchase_book(isbn, store_id, customer_id, quantity):
     with Session() as session:
 
         # Query the inventory for the store and book
-        inventory = session.query(Inventory).filter_by(ISBN13=isbn, StoreID=store_id).one()
+        inventory = session.query(Inventory).filter_by(isbn13=isbn, StoreID=store_id).one()
 
-        if inventory.Stock < quantity:
+        if inventory.stock < quantity:
             print("Sry, out of stock in this store. Try another store.") #TODO check other stores for customer or smt
             return
 
         # Update the stock in the inventory & get price
-        inventory.Stock -= quantity
+        inventory.stock -= quantity
         
-        book_price = session.query(Book.Price).filter_by(ISBN13=isbn).scalar()
+        book_price = session.query(Books.price).filter_by(isbn13=isbn).scalar()
 
         total_cost = round(book_price * quantity, 2)
 
         # Create a new transaction for the purchase
-        transaction = Transaction(ISBN13=isbn, StoreID=store_id, CustomerID=customer_id, Quantity=quantity, Total_Cost=total_cost)
+        transaction = Transaction(isbn13=isbn, StoreID=store_id, CustomerID=customer_id, quantity=quantity, total_cost=total_cost)
         session.add(transaction)
 
         # Update the customer's list of books
@@ -37,8 +37,8 @@ def purchase_book(isbn, store_id, customer_id, quantity):
         session.commit()
 
     # Get the name of the book, store and customer (TODO: probably an easier way to do this)
-    book_name = session.query(Book.Title).filter_by(ISBN13=isbn).scalar()
-    store_name = session.query(Store.store_name).filter_by(ID=store_id).scalar()
+    book_name = session.query(Books.title).filter_by(isbn13=isbn).scalar()
+    store_name = session.query(Store.store_name).filter_by(id=store_id).scalar()
     customer_name = session.query(Customer.name).filter_by(ID=customer_id).scalar()
 
     # Total books owned and total spending
@@ -48,9 +48,9 @@ def purchase_book(isbn, store_id, customer_id, quantity):
     unique_books_count = session.query(func.count(distinct(CustomerBooks.book_id))).filter_by(customer_id=customer_id).scalar()
 
     print(f"{customer_name} purchased {quantity} copies of '{book_name}' (ISBN: {isbn}) from '{store_name}' for a total cost of {total_cost}.")
-    print(f"{customer_name} now owns {total_books_owned} books ({unique_books_count} unique) and has a total spending of {total_spending}.")
+    print(f"{customer_name} now owns {total_books_owned} book(s) ({unique_books_count} unique) and has a total spending of {total_spending}.")
 
-    remaining_stock = session.query(Inventory.Stock).filter_by(ISBN13=isbn, StoreID=store_id).scalar()
+    remaining_stock = session.query(Inventory.stock).filter_by(isbn13=isbn, StoreID=store_id).scalar()
 
     if remaining_stock < 10:
         print(f"Heads up! There are only {remaining_stock} copies of '{book_name}' (ISBN: {isbn}) left in stock at '{store_name}'. Order new?")
