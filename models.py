@@ -77,11 +77,11 @@ class CustomerBooks(Base):
 class Transaction(Base):
     __tablename__ = 'Transactions'
     id = Column(Integer, primary_key=True)
-    TransactionDate = Column(DateTime, default=datetime.utcnow)
+    transaction_date = Column(DateTime, default=datetime.utcnow)
     CustomerID = Column(Integer, ForeignKey('Customer.ID'))
-    customer = relationship("Customer")
-    ISBN13 = Column(String(13), ForeignKey('Books.isbn13'))
+    #customer = relationship("Customer")
+    isbn13 = Column(String(13), ForeignKey('Books.isbn13'))
     StoreID = Column(Integer)
-    Book = relationship("Books")
-    Quantity = Column(Integer)
-    Total_Cost = Column(Numeric(precision=2))
+    book = relationship("Books")
+    quantity = Column(Integer)
+    total_cost = Column(Numeric(precision=2))
