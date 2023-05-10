@@ -15,16 +15,17 @@ def purchase_book(isbn, store_id, customer_id, quantity):
 
         # TODO: this works IFF the book exists with stock value of 0, otherwise above exception will run
         if inventory.stock < quantity:
-            print("Sry, out of stock in this store.")
+            print(f"Sry, {get_title(isbn)} is out of stock in this store.")
 
             print("Checking other stores...") 
 
             results = get_stores_by_isbn(isbn)
             store_ids = [result[0] for result in results]
+            
             if sum(store_ids) == 0:
                 print('Sry, the book could not be found in any store.')
                 return
-
+#
             for store_id in store_ids:
                 store_with_book_in_stock = get_store(store_id)
             print(f'Great news, the book {get_title(isbn)} was found at {store_with_book_in_stock}!')
@@ -92,7 +93,7 @@ def get_store(store_id):
     return Session().query(Store.store_name).filter_by(id=store_id).scalar()
 
 def get_customer(customer_id):
-    return Session().query(Customer.name).filter_by(ID=customer_id).scalar()
+    return Session().query(Customer.name).filter_by(ID=customer_id).one()
 
 def get_book_price(isbn):
     return Session().query(Books.price).filter_by(isbn13=isbn).scalar()
