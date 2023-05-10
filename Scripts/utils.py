@@ -1,4 +1,9 @@
 import sqlite3
+from models import *
+
+def get_title(isbn):
+        return Session().query(Books.title).filter_by(isbn13=isbn).scalar()
+
 
 # Validate ISBN
 # Source https://rosettacode.org/wiki/ISBN13_check_digit
@@ -60,3 +65,4 @@ def drop_table(name, file_name='amazun.db'):
 
     conn.commit()
     conn.close()
+
