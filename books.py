@@ -181,10 +181,10 @@ def get_dummy_authors():
             try:
                 new_author = Author(name=first_name, surname=last_name)
                 session.add(new_author)
-                session.commit()
+                #session.commit()
 
             except IntegrityError:
-                print(f"Author '{author_name}' already exists.")
+                logging.warning(f"Author '{author_name}' already exists.")
                 session.rollback()
 
 
