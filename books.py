@@ -98,7 +98,7 @@ def add_to_inventory(isbn, store_id, copies, verbose=False):
 
     if verbose:
         store_name = session.query(Store.store_name).filter_by(id=store_id).scalar()
-        print(f'Added {copies} copies to {store_name}.')
+        print(f'Added {copies} copies of {isbn} to {store_name}.')
 
 def burn_book(isbn, verbose=False):
     """
