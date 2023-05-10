@@ -1,6 +1,6 @@
 from models import *
 import os, store_manager, books, customer
-from Scripts.utils import titles_by_author, get_title
+from Scripts.utils import titles_by_author, get_title, total_sales
 
 if __name__ == '__main__':
     main_db = 'amazun.db'
@@ -36,10 +36,11 @@ if __name__ == '__main__':
     # Customer book purchase
     customer.purchase_book(9780007117116, 1, 1, 10)
     customer.purchase_book(9780007117116, 2, 2, 1)
-
     # Move books
     store_manager.move_books(9780007117116, 2, 3, 1000)
     store_manager.move_books(9780007117116, 1, 2, 190)
-
     customer.purchase_book("9780007117116", 1, 3, 3)
     customer.purchase_book("9780007117116", 3, 3, 3)
+
+    total_sales()
+

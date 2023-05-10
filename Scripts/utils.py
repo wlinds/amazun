@@ -1,8 +1,9 @@
 import sqlite3
 from models import *
 
-def get_title(isbn):
+def get_title(isbn): # Not sure if this should be in util or in other module
         return Session().query(Books.title).filter_by(isbn13=isbn).scalar()
+    # TODO: Code block with similar functions currently in customer.py
 
 
 # Validate ISBN
@@ -66,3 +67,23 @@ def drop_table(name, file_name='amazun.db'):
     conn.commit()
     conn.close()
 
+def total_sales():
+    with Session() as session:
+        total_sales = session.query(func.sum(Transaction.total_cost)).scalar()
+        sales = round(total_sales)
+        if sales < 10:
+            i = "Oh.."
+        elif sales == 69 or sales == 420:
+            i = "Nice." 
+        elif sales > 100:
+            i = "Ok!"
+        elif sales > 1000:
+            i = "Sweet!"
+        elif sales > 10_000:
+            i = "Ay caramba!"
+        elif sales > 100_000:
+            i = "Wohooo!"
+        elif sales > 1_000_000:
+            i = "Mr. Bezos.. We meet again."
+
+        print(f'Total sales: {sales} coins. {i}')
