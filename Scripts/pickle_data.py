@@ -14,7 +14,8 @@ books = [
     ('9780316346627', 'A Game of Thrones', 'English', 16.99, datetime(1996, 8, 1), 'Fantasy', 7),
     ('9780061124952', 'American Gods', 'English', 15.99, datetime(2001, 6, 19), 'Fantasy', 8),
     ('9780679745587', 'One Hundred Years of Solitude', 'Spanish', 18.99, datetime(1967, 5, 30), 'Magical Realism', 9),
-    ('9780553382563', 'The Hitchhiker\'s Guide to the Galaxy', 'English', 12.99, datetime(1979, 10, 12), 'Science Fiction / Comedy', 10)
+    ('9780553382563', 'The Hitchhiker\'s Guide to the Galaxy', 'English', 12.99, datetime(1979, 10, 12), 'Science Fiction / Comedy', 10),
+    ('9781473214712', 'Good Omens', 'English', 15.99, datetime(2015, 10, 29), 'Horror / Fantasy / Comedy', 11),
     ]
 
 authors = ['J.R.R. Tolkien',
@@ -26,7 +27,9 @@ authors = ['J.R.R. Tolkien',
     'George R.R. Martin',
     'Neil Gaiman',
     'Gabriel Garcia Marquez',
-    'Douglas Adams'
+    'Douglas Adams',
+    'Neil Gaiman',
+    'Terry Pratchett'
     ]
 
 customer_data = [
@@ -38,5 +41,5 @@ customer_data = [
     ]
 
 dummy_tuple = (books, authors, customer_data)
-with open ('dummy_tuple', 'wb') as f:
-    pickle.dump(starter_content, f)
+with open ('starter_content', 'wb') as f:
+    pickle.dump(dummy_tuple, f)
