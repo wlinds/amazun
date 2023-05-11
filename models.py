@@ -23,6 +23,14 @@ class Author(Base):
     surname = Column(String)
     birthdate = Column(String)
     books = relationship('Books', back_populates='author')
+    #books = relationship('Books', secondary='book_authors', back_populates='authors')
+
+# Currently not in use
+book_authors = Table('book_authors', Base.metadata,
+    Column('book_id', Integer, ForeignKey('Books.isbn13')),
+    Column('author_id', Integer, ForeignKey('Author.ID')),
+    Column('author_order', Integer),
+)
 
 class Books(Base):
     __tablename__ = 'Books'
@@ -34,6 +42,7 @@ class Books(Base):
     genre = Column(String, nullable=True)
     AuthID = Column(Integer, ForeignKey('Author.ID'))
     author = relationship('Author', back_populates='books')
+    #authors = relationship('Author', secondary='book_authors', back_populates='books')
     inventory = relationship('Inventory', back_populates='book')
 
 
