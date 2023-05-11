@@ -1,6 +1,7 @@
 # For customers
 from models import *
-from sqlalchemy.orm.exc import NoResultFound 
+from Scripts.utils import unpickle_dummy
+from sqlalchemy.orm.exc import NoResultFound
 
 def purchase_book(isbn, store_id, customer_id, quantity):
     with Session() as session:
@@ -25,7 +26,7 @@ def purchase_book(isbn, store_id, customer_id, quantity):
             if sum(store_ids) == 0:
                 print('Sry, the book could not be found in any store.')
                 return
-#
+
             for store_id in store_ids:
                 store_with_book_in_stock = get_store(store_id)
             print(f'Great news, the book {get_title(isbn)} was found at {store_with_book_in_stock}!')
@@ -69,15 +70,7 @@ def purchase_book(isbn, store_id, customer_id, quantity):
         print(f"Heads up! There are only {remaining_stock} copies of '{book_name}' (ISBN: {isbn}) left in stock at '{store_name}'. Order new?")
 
 def get_dummy_cst():
-
-    # Dummy data for Customer table
-    customer_data = [
-        ('John', 'Doe', 'johndoe@example.com', '123 Main St', 'New York', 'NY', '10001'),
-        ('Jane', 'Smith', 'janesmith@example.com', '456 Elm St', 'Los Angeles', 'CA', '90001'),
-        ('Bob', 'Johnson', 'bobjohnson@example.com', '789 Oak St', 'Chicago', 'IL', '60601'),
-        ('Alice', 'Lee', 'alicelee@example.com', '321 Maple St', 'Houston', 'TX', '77001'),
-        ('David', 'Brown', 'davidbrown@example.com', '654 Pine St', 'Philadelphia', 'PA', '19101')
-    ]
+    customer_data = unpickle_dummy()[2]
 
     with Session() as session:
         for name, surname, address, city, state, zipcode, email in customer_data:

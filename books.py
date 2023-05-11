@@ -1,13 +1,8 @@
-from models import * 
-# models.py currently contain engine, session, declarative_base and Base classes for Author, Book, Store & Inventory
+from models import * # models.py contain engine, session, declarative_base and table Base classes
+from Scripts.utils import validate_isbn, unpickle_dummy
 
-from Scripts.utils import validate_isbn
-
-from sqlalchemy.orm.exc import NoResultFound 
-# NoResultFound is currently used only in burn_book() to check if ISBN exist in db
-
-from sqlalchemy.exc import IntegrityError
-# Used to check duplicates in get_dummy_books
+from sqlalchemy.orm.exc import NoResultFound  # NoResultFound is currently used only in burn_book() to check if ISBN exist in db
+from sqlalchemy.exc import IntegrityError # Used to check duplicates in get_dummy_books
 
 def search_books(search_term):
     """
@@ -130,20 +125,7 @@ def burn_book(isbn, verbose=False):
         print(f'Book with ISBN {isbn} and its associated inventory have been removed from the database.')
 
 def get_dummy_books():
-
-    #TODO: pickle or csv this
-    books = [
-    ('9780007117116', 'The Lord of the Rings', 'English', 29.99, datetime(1954, 7, 29), 'Fantasy', 1),
-    ('9780439554930', 'Harry Potter and the Philosopher\'s Stone', 'English', 9.99, datetime(1997, 6, 26), 'Fantasy', 2),
-    ('9780553801477', 'Foundation', 'English', 19.99, datetime(1951, 5, 1), 'Science Fiction', 3),
-    ('9780553588488', 'Ender\'s Game', 'English', 14.99, datetime(1985, 1, 1), 'Science Fiction', 4),
-    ('9781400031702', 'The Picture of Dorian Gray', 'English', 10.99, datetime(1890, 7, 1), 'Gothic Fiction', 5),
-    ('9780141187761', 'Nineteen Eighty-Four', 'English', 12.99, datetime(1949, 6, 8), 'Dystopian Fiction', 6),
-    ('9780316346627', 'A Game of Thrones', 'English', 16.99, datetime(1996, 8, 1), 'Fantasy', 7),
-    ('9780061124952', 'American Gods', 'English', 15.99, datetime(2001, 6, 19), 'Fantasy', 8),
-    ('9780679745587', 'One Hundred Years of Solitude', 'Spanish', 18.99, datetime(1967, 5, 30), 'Magical Realism', 9),
-    ('9780553382563', 'The Hitchhiker\'s Guide to the Galaxy', 'English', 12.99, datetime(1979, 10, 12), 'Science Fiction / Comedy', 10)
-    ]
+    books = unpickle_dummy()[0]
 
     with Session() as session:
         for isbn, title, language, price, release, genre, author in books:
@@ -157,22 +139,9 @@ def get_dummy_books():
                 session.rollback()
 
 def get_dummy_authors():
-
-    #TODO: pickle or csv this
-    authors = ['J.R.R. Tolkien',
-    'J.K. Rowling',
-    'Isaac Asimov',
-    'Orson Scott Card',
-    'Oscar Wilde',
-    'George Orwell',
-    'George R.R. Martin',
-    'Neil Gaiman',
-    'Gabriel Garcia Marquez',
-    'Douglas Adams'
-    ]
+    authors = unpickle_dummy()[1]
 
     with Session() as session:
-
         for author_name in authors:
             split_name = author_name.split()
             first_name = split_name[0]
