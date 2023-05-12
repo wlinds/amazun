@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Transactions -->
+
+<head>
+	<title>Transactions</title>
+</head>
+<body>
+	<table>
+		<tr>
+			<th>ID</th>
+			<th>Transaction Date</th>
+			<th>Customer ID</th>
+			<th>ISBN13</th>
+			<th>Store ID</th>
+			<th>Quantity</th>
+			<th>Total Cost</th>
+		</tr>
+		{% for transaction in results %}
+		<tr>
+			<td>{{ transaction.id }}</td>
+			<td>{{ transaction.transaction_date }}</td>
+			<td>{{ transaction.CustomerID }}</td>
+			<td>{{ transaction.isbn13 }}</td>
+			<td>{{ transaction.StoreID }}</td>
+			<td>{{ transaction.quantity }}</td>
+			<td>{{ transaction.total_cost }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+</body>
+</html>
