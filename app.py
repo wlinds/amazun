@@ -9,12 +9,15 @@ database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'amazun.
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
 db = SQLAlchemy(app)
 
-
 @app.route('/transactions')
 def view():
     transaction_table = db.session.query(Transaction).all()
-    return render_template('transactions.html', results=transaction_table)
 
+    sales_info = total_sales()
+
+    return render_template('transactions.html', results=transaction_table, total_sales=sales_info)
+
+#TODO: Route for drop down purchases
 
 if __name__ == '__main__':
     Base.metadata.create_all(bind=engine)
