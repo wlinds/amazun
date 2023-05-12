@@ -61,7 +61,7 @@ def purchase_book(isbn, store_id, customer_id, quantity):
 
     unique_books_count = session.query(func.count(distinct(CustomerBooks.book_id))).filter_by(customer_id=customer_id).scalar()
 
-    print(f"{customer_name} purchased {quantity} copies of '{book_name}' (ISBN: {isbn}) from '{store_name}' for a total cost of {total_cost}.")
+    print(f"{customer_name} purchased {quantity} copies of '{book_name}' from {store_name} for a total cost of {total_cost}.")
     print(f"{customer_name} now owns {total_books_owned} book(s) ({unique_books_count} unique) and has a total spending of {total_spending}.")
 
     remaining_stock = session.query(Inventory.stock).filter_by(isbn13=isbn, StoreID=store_id).scalar()
@@ -73,20 +73,29 @@ def get_dummy_cst():
     customer_data = unpickle_dummy()[2]
 
     with Session() as session:
-        for name, surname, address, city, state, zipcode, email in customer_data:
+        for name, surname, email, address, city, state, zipcode in customer_data:
             new_customer = Customer(name=name, surname=surname, address=address, city=city, state=state, zipcode=zipcode, email=email)
             session.add(new_customer)
             session.commit()
 
+def new_customer(name, surname, address, city, state, zipcode, email, verbose=False):
+    with Session() as session:
+        new_customer = Customer(name=name, surname=surname, address=address, city=city, state=state, zipcode=zipcode, email=email)
+        session.add(new_customer)
+        session.commit()
+    if verbose:
+        print(f'{name} has successfully been registered as customer.')
+
+
 # -- TODO: Where to put this? Utils? Also: make it just one function? -- #
 def get_title(isbn):
-    return Session().query(Books.title).filter_by(isbn13=isbn).scalar()
+    return Session().query(Books.title).filter_by(isbn13=isbn).one()[0]
 
 def get_store(store_id):
-    return Session().query(Store.store_name).filter_by(id=store_id).scalar()
+    return Session().query(Store.store_name).filter_by(id=store_id).one()[0]
 
 def get_customer(customer_id):
-    return Session().query(Customer.name).filter_by(ID=customer_id).one()
+    return Session().query(Customer.name).filter_by(ID=customer_id).one()[0]
 
 def get_book_price(isbn):
     return Session().query(Books.price).filter_by(isbn13=isbn).scalar()
@@ -101,10 +110,14 @@ def get_stores_by_isbn(isbn):
     store_ids = Session().query(inv_subq.c.StoreID).distinct().all()
     return store_ids
 
+def get_all_customer():
+    with Session() as session:
+        customers = session.query(Customer).all()
+        return customers
+
 # ---------------------------------------------------------------------- #
 
 if __name__ == '__main__':
-
     purchase_book("9780007117116", 1, 3, 3)
     purchase_book("9780007117116", 2, 3, 3)
     #purchase_book("97806797455817", 1, 3, 3)
