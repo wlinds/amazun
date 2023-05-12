@@ -46,7 +46,7 @@ if __name__ == '__main__':
     customer.purchase_book("9780007117116", 1, 3, 3)
     customer.purchase_book("9780007117116", 3, 3, 3)
 
-    total_sales()
+    print(total_sales())
 
     # Add customer
     customer.new_customer('Sixth Amorite King Hammurobi', 'King of the Old Babylonian Empire', 'Mušḫuššu', 'Babylon', 'Mesopotamia', 'none', 'amorite_king@anumail.com', verbose=True)

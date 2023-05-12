@@ -90,4 +90,5 @@ def total_sales():
         elif sales > 1_000_000:
             i = "Mr. Bezos.. We meet again."
 
-        print(f'Total sales: {sales} coins. {i}')
+        #print(f'Total sales: {sales} coins. {i}')
+        return f'Total sales: {sales} coins. {i}'
