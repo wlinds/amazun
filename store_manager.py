@@ -1,7 +1,7 @@
 from models import *
 from sqlalchemy.exc import IntegrityError
 
-def add_store(name: str, address: str):
+def add_store(name: str, address: str, verbose=False):
     """
     Create a new store.
     """
@@ -11,7 +11,8 @@ def add_store(name: str, address: str):
             new_store = Store(store_name=name, store_address=address)
             session.add(new_store)
             session.commit()
-            print(f"Added store '{name}'")
+            if verbose:
+                print(f"Added store '{name}'")
         except IntegrityError:
             print(f"Store '{name}' already exists")
 
@@ -52,7 +53,11 @@ def move_books(isbn, from_store_id, to_store_id, quantity):
 
             session.commit()
 
-            print(f"{quantity} copies of ISBN {isbn} moved from store {from_store_id} to store {to_store_id}.")
+            # Get store name
+            from_store_title = session.query(Store.store_name).filter_by(id=from_store_id).one()[0]
+            to_store_title = session.query(Store.store_name).filter_by(id=to_store_id).one()[0]
+
+            print(f"{quantity} copies of ISBN {isbn} moved from {from_store_title} to {to_store_title}.")
             return True
 
         except IntegrityError as e:
