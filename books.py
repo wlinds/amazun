@@ -4,6 +4,21 @@ from Scripts.utils import validate_isbn, unpickle_dummy
 from sqlalchemy.orm.exc import NoResultFound  # NoResultFound is currently used only in burn_book() to check if ISBN exist in db
 from sqlalchemy.exc import IntegrityError # Used to check duplicates in get_dummy_books
 
+def add_author(name, surname, birthdate, verbose=False):
+    with Session() as session:
+        new_auth = Author(
+            name=name,
+            surname=surname,
+            birthdate=birthdate
+        )
+        session.add(new_auth)
+        session.commit()
+
+    if verbose:
+            last_id = session.query(Author.ID).order_by(Author.ID.desc()).first()[0]
+            print(f'{name} has probably been added and received AuthID {last_id}.')
+
+
 def search_books(search_term):
     """
     Search for books currently in store
@@ -25,7 +40,7 @@ def search_books(search_term):
             results[book.title] = [(store.store_name, inventory.stock)]
     return results
 
-def add_book(title, language, price, release_date, author_id, isbn, validate=False, verbose=False):
+def add_book(title, language, price, release_date, author_id, isbn, genre, validate=False, verbose=False):
     """
     Add a book to Book table.
     """
@@ -53,6 +68,7 @@ def add_book(title, language, price, release_date, author_id, isbn, validate=Fal
         language=language,
         price=price,
         release=release_date,
+        genre=genre,
         AuthID=author_id
     )
     session.add(new_book)
@@ -60,7 +76,7 @@ def add_book(title, language, price, release_date, author_id, isbn, validate=Fal
     session.close()
 
     if verbose:
-        print(f'Added book with ISBN: {isbn} to table.')
+        print(f'Successfully registered {title}, {isbn} as book.')
 
 def add_all_books(store_id=1, copies=400, verbose=False):
     with Session() as session:
@@ -75,7 +91,6 @@ def add_all_books(store_id=1, copies=400, verbose=False):
 
 # TODO: This add_all_books() create a session and then calls add_to_inventory() which also 
 # creates a session. I'm surprised this works with no errors, but it might be stupid/slow.
-
 
 def add_to_inventory(isbn, store_id, copies, verbose=False):
     """
@@ -92,8 +107,9 @@ def add_to_inventory(isbn, store_id, copies, verbose=False):
     session.commit()
 
     if verbose:
-        store_name = session.query(Store.store_name).filter_by(id=store_id).scalar()
-        print(f'Added {copies} copies of {isbn} to {store_name}.')
+        title = session.query(Books.title).filter_by(isbn13=isbn).one()[0]
+        store_name = session.query(Store.store_name).filter_by(id=store_id).one()[0]
+        print(f'Added {copies} copies of {title}, {isbn} to {store_name}.')
 
 def burn_book(isbn, verbose=False):
     """
@@ -102,18 +118,19 @@ def burn_book(isbn, verbose=False):
     session = Session()
 
     try:
-        book_to_remove = session.query(Book).filter_by(ISBN13=isbn).one()
+        book_to_remove = session.query(Books).filter_by(isbn13=isbn).one()
     except NoResultFound:
         session.close()
         print(f'Book with ISBN {isbn} does not exist in the database.')
         return
 
     try:
-        inventory_to_remove = session.query(Inventory).filter_by(ISBN13=isbn).all()
+        inventory_to_remove = session.query(Inventory).filter_by(isbn13=isbn).all()
     except NoResultFound:
         inventory_to_remove = None
 
     if inventory_to_remove:
+        title = session.query(Books.title).filter_by(isbn13=isbn).one()[0] # Only for printing title
         for inventory in inventory_to_remove:
             session.delete(inventory)
 
@@ -122,7 +139,7 @@ def burn_book(isbn, verbose=False):
     session.close()
 
     if verbose:
-        print(f'Book with ISBN {isbn} and its associated inventory have been removed from the database.')
+        print(f"All copies of {title} have been burned.")
 
 def get_dummy_books():
     books = unpickle_dummy()[0]
