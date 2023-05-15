@@ -3,6 +3,7 @@ from Scripts.utils import validate_isbn, unpickle_dummy
 
 from sqlalchemy.orm.exc import NoResultFound  # NoResultFound is currently used only in burn_book() to check if ISBN exist in db
 from sqlalchemy.exc import IntegrityError # Used to check duplicates in get_dummy_books
+import logging
 
 def add_author(name, surname, birthdate, verbose=False):
     with Session() as session:
