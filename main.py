@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
     # Add book to store inventory by searching title
     store.add_to_inventory(books.get_isbn('Good Omens'), 2, 10, verbose=True)
-    # Maybe the add_to_inventory should be modified to take both isbn and title as args instead.
+    # Maybe the add_to_inventory should be modified to take either isbn or title as args instead.
 
     # Find all books by author
     books.find_all_by_author(8, verbose=True)
