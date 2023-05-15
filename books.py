@@ -3,7 +3,57 @@ from Scripts.utils import validate_isbn, unpickle_dummy
 
 from sqlalchemy.orm.exc import NoResultFound  # NoResultFound is currently used only in burn_book() to check if ISBN exist in db
 from sqlalchemy.exc import IntegrityError # Used to check duplicates in get_dummy_books
+from sqlalchemy.orm import aliased # Used to find authors in multiple tables
 import logging
+
+def get_isbn(title):
+    session = Session()
+    book = session.query(Books).filter_by(title=title).first()
+    session.close()
+
+    if book:
+        return book.isbn13
+    else:
+        return None
+
+def find_all_by_author(author_id, verbose=False):
+    session = Session()
+
+    ba = aliased(book_authors)
+
+    found_books = (
+        session.query(Books)
+        .join(ba, Books.isbn13 == ba.c.book_id, isouter=True)
+        .join(Author, Author.ID == ba.c.author_id, isouter=True)
+        .filter((Author.ID == author_id) | (Books.AuthID == author_id))
+        .all()
+    )
+
+    session.close()
+
+    if verbose:
+        full_name = get_author_name(author_id)
+        if found_books:
+            print(f"Books by {full_name}:")
+            for book in found_books:
+                print(f"- {book.title}")
+        else:
+            print(f"No books found by {full_name}.")
+
+    if found_books:
+        return found_books
+    else:
+        return None
+
+def get_author_name(author_id):
+    session = Session()
+    author = session.query(Author).filter_by(ID=author_id).first()
+    session.close()
+
+    if author:
+        return f'{author.name} {author.surname}'
+    else:
+        return None
 
 def add_author(name, surname, birthdate, verbose=False):
     with Session() as session:
@@ -124,11 +174,12 @@ def get_dummy_authors():
                 logging.warning(f"Author '{author_name}' already exists.")
                 session.rollback()
 
-
 if __name__ == '__main__':
     main_db = 'amazun.db'
 
-    Base.metadata.create_all(bind=engine) 
+    Base.metadata.create_all(bind=engine)
+
+    print(get_author_name(2))
 
 
     # These functions are still a bit wonky TODO
