@@ -21,16 +21,23 @@ def scrape_wiki(name):
     return birthdate.get_text().strip()
 
 def get_birthdates(authors, delay=0.05):
-
     birthdates = []
+
     for author in authors:
         birthdate = scrape_wiki(author)
 
         regex = r"\((\d{4}-\d{2}-\d{2})\)"
-
         matches = re.findall(regex, birthdate)
 
-        birthdates.append(matches)
+        if matches:
+            birthdates.extend(matches)
+        else:
+            birthdates.extend([None])
+
         time.sleep(delay)
 
     return birthdates
+
+if __name__ == '__main__':
+    a = get_birthdates(['George Orwell', 'George R.R. Martin', 'Isaac Asimov'])
+    print(a)
