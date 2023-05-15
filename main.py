@@ -77,4 +77,23 @@ if __name__ == '__main__':
         print(f'{customer.name} {customer.surname}')
 
 
-    # Count recently active customer
+    # Multiple authors, (association table in models.py) TODO: Make this a function
+    session = Session()
+    book = session.query(Books).filter_by(isbn13='9781473214712').first()
+    author1 = session.query(Author).filter_by(name='Terry', surname='Pratchett').first()
+    author2 = session.query(Author).filter_by(name='Neil', surname='Gaiman').first()
+
+    book.authors.append(author1)
+    book.authors.append(author2)
+
+    session.add(book)
+    session.commit()
+
+    # Add book to store inventory by searching title
+    store.add_to_inventory(books.get_isbn('Good Omens'), 2, 10, verbose=True)
+    # Maybe the add_to_inventory should be modified to take both isbn and title as args instead.
+
+    # Find all books by author
+    books.find_all_by_author(8, verbose=True)
+    books.find_all_by_author(11, verbose=True)
+    books.find_all_by_author(1, verbose=True)
