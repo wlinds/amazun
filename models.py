@@ -20,6 +20,7 @@ class Author(Base):
     name = Column(String)
     surname = Column(String)
     birthdate = Column(String)
+    wiki = Column(String)
     books = relationship('Books', back_populates='author')
     books = relationship('Books', secondary='book_authors', back_populates='authors') # Association table
 
