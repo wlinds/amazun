@@ -141,7 +141,7 @@ def get_dummy_books():
     """
     Adds 11 default books to Books table.
     """
-    books = unpickle_dummy()[0]
+    books = unpickle_dummy(file='starter_content')[0]
 
     with Session() as session:
         for isbn, title, language, price, release, genre, author in books:
@@ -156,17 +156,19 @@ def get_dummy_books():
 
 def get_dummy_authors():
     """
-    Adds 12 default authors to Author table.
+    Adds 11 default authors to Author table.
     """
-    authors = unpickle_dummy()[1]
+
+    authors, author_birthdates = unpickle_dummy(file='starter_content')[1:3]
+    
     with Session() as session:
-        for author_name in authors:
+        for author_name, birthdate in zip(authors, author_birthdates):
             split_name = author_name.split()
             first_name = split_name[0]
             last_name = " ".join(split_name[1:])
 
             try:
-                new_author = Author(name=first_name, surname=last_name)
+                new_author = Author(name=first_name, surname=last_name, birthdate=birthdate)
                 session.add(new_author)
                 session.commit()
 

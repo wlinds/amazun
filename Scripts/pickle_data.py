@@ -1,5 +1,6 @@
 import pickle
 from datetime import datetime
+from scrapes import get_birthdates
 
 # Store tuple as byte stream
 # This file can be removed. Kept for now if we want to change anything in the dummy data.
@@ -40,6 +41,11 @@ customer_data = [
         ('David', 'Brown', 'davidbrown@example.com', '654 Pine St', 'Philadelphia', 'PA', '19101')
     ]
 
-dummy_tuple = (books, authors, customer_data)
-with open ('starter_content', 'wb') as f:
-    pickle.dump(dummy_tuple, f)
+# I really like this scrape function 
+author_birthdates = get_birthdates(authors, delay=0.01)
+
+if __name__ == '__main__':
+    dummy_tuple = (books, authors, author_birthdates, customer_data)
+    with open ('starter_content', 'wb') as f:
+        pickle.dump(dummy_tuple, f)
+    print('Success')

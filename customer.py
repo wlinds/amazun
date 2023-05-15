@@ -70,7 +70,7 @@ def purchase_book(isbn, store_id, customer_id, quantity):
         print(f"Heads up! There are only {remaining_stock} copies of '{book_name}' (ISBN: {isbn}) left in stock at '{store_name}'. Order new?")
 
 def get_dummy_cst():
-    customer_data = unpickle_dummy()[2]
+    customer_data = unpickle_dummy(file='starter_content')[3]
 
     with Session() as session:
         for name, surname, email, address, city, state, zipcode in customer_data:

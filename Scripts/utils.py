@@ -6,8 +6,8 @@ def get_title(isbn): # Not sure if this should be in util or in other module
         return Session().query(Books.title).filter_by(isbn13=isbn).scalar()
     # TODO: Code block with similar functions currently in customer.py
 
-def unpickle_dummy():
-    with open("starter_content", "rb") as f:
+def unpickle_dummy(file):
+    with open(file, "rb") as f:
         return pickle.load(f)
 
 # Validate ISBN
