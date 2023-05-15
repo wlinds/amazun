@@ -1,5 +1,6 @@
 from models import *
-import os, store_manager, books, customer
+import os, books, customer
+import store_manager as store
 from Scripts.utils import titles_by_author, get_title, total_sales
 
 if __name__ == '__main__':
@@ -11,16 +12,16 @@ if __name__ == '__main__':
 
     Base.metadata.create_all(bind=engine)
 
-    store_manager.get_dummy_stores()
+    store.get_dummy_stores()
     books.get_dummy_books()
     books.get_dummy_authors()
 
 
     # Add 200 copies of Lord of The Rings to Store 1
-    books.add_to_inventory(9780007117116, 1, 200, verbose=True)
+    store.add_to_inventory(9780007117116, 1, 200, verbose=True)
 
     # Add 5000 copies of ALL existing books to store 2:
-    books.add_all_books(store_id=2, copies=5000, verbose=True)
+    store.add_all_books(store_id=2, copies=5000, verbose=True)
 
     # Add view #TODO: Missing date of birth
     titles_by_author()
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 
     # Search book
     search_title = "The"
-    results = books.search_books(search_title)
+    results = store.search_books(search_title)
     print(f'Searching for books containing "{search_title}"')
 
     for i in results:
@@ -41,8 +42,8 @@ if __name__ == '__main__':
     customer.purchase_book(9780007117116, 2, 2, 1)
 
     # Move books
-    store_manager.move_books(9780007117116, 2, 3, 1000)
-    store_manager.move_books(9780007117116, 1, 2, 190)
+    store.move_books(9780007117116, 2, 3, 1000)
+    store.move_books(9780007117116, 1, 2, 190)
     customer.purchase_book("9780007117116", 1, 3, 3)
     customer.purchase_book("9780007117116", 3, 3, 3)
 
@@ -56,15 +57,15 @@ if __name__ == '__main__':
     books.add_author('God', 'Christ', datetime(1, 1, 1), verbose=True)
 
     # Add book to existence (add to book table)
-    books.add_book('Pyton for dummies', 'English', '9.99', datetime(2015, 10, 29), 'null', 9781473214714, 'Educational', verbose=True)
-    books.add_to_inventory(9781473214714, 2, 200, verbose=True)
+    books.add_new('Pyton for dummies', 'English', '9.99', datetime(2015, 10, 29), 'null', 9781473214714, 'Educational', verbose=True)
+    store.add_to_inventory(9781473214714, 2, 200, verbose=True)
 
-    books.add_book('The Old Testament (Original)', 'English', '9.99', datetime(2015, 10, 29), '1', 9780195378405, 'Artefact', verbose=True)
-    books.add_to_inventory(9780195378405, 2, 1, verbose=True)
+    books.add_new('The Old Testament (Original)', 'English', '9.99', datetime(2015, 10, 29), '1', 9780195378405, 'Artefact', verbose=True)
+    store.add_to_inventory(9780195378405, 2, 1, verbose=True)
 
     # Add new store
-    store_manager.add_store('Catholic Church', 'Vatican City', verbose=False)
-    store_manager.move_books(9780195378405, 2, 4, 1)
+    store.add_store('Catholic Church', 'Vatican City', verbose=False)
+    store.move_books(9780195378405, 2, 4, 1)
 
     # Remove book
     books.burn_book(9780195378405, verbose=True)

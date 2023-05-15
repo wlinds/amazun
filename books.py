@@ -18,29 +18,7 @@ def add_author(name, surname, birthdate, verbose=False):
             last_id = session.query(Author.ID).order_by(Author.ID.desc()).first()[0]
             print(f'{name} has probably been added and received AuthID {last_id}.')
 
-
-def search_books(search_term):
-    """
-    Search for books currently in store
-    """
-
-    session = Session()
-    filter_book = (
-        session.query(Books, Inventory, Store)
-        .join(Inventory.book)
-        .join(Inventory.store)
-        .filter(Books.title.ilike(f'%{search_term}%'))
-        .all()
-    )
-    results = {}
-    for book, inventory, store in filter_book:
-        if book.title in results:
-            results[book.title].append((store.store_name, inventory.stock))
-        else:
-            results[book.title] = [(store.store_name, inventory.stock)]
-    return results
-
-def add_book(title, language, price, release_date, author_id, isbn, genre, validate=False, verbose=False):
+def add_new(title, language, price, release_date, author_id, isbn, genre, validate=False, verbose=False):
     """
     Add a book to Book table.
     """
@@ -78,39 +56,6 @@ def add_book(title, language, price, release_date, author_id, isbn, genre, valid
     if verbose:
         print(f'Successfully registered {title}, {isbn} as book.')
 
-def add_all_books(store_id=1, copies=400, verbose=False):
-    with Session() as session:
-        all_books = session.query(Books).all()
-        for book in all_books:
-            isbn = book.isbn13
-            add_to_inventory(isbn, store_id, copies)
-        session.commit()
-    if verbose:
-        store_name = session.query(Store.store_name).filter_by(id=store_id).scalar()
-        print(f'Added {copies} of all existing books to {store_name}')
-
-# TODO: This add_all_books() create a session and then calls add_to_inventory() which also 
-# creates a session. I'm surprised this works with no errors, but it might be stupid/slow.
-
-def add_to_inventory(isbn, store_id, copies, verbose=False):
-    """
-    Add book to Inventory table.
-    """
-
-    session = Session()
-    inventory = session.query(Inventory).filter_by(isbn13=isbn, StoreID=store_id).first()
-    if inventory:
-        inventory.stock += copies
-    else:
-        inventory = Inventory(isbn13=isbn, StoreID=store_id, stock=copies)
-        session.add(inventory)
-    session.commit()
-
-    if verbose:
-        title = session.query(Books.title).filter_by(isbn13=isbn).one()[0]
-        store_name = session.query(Store.store_name).filter_by(id=store_id).one()[0]
-        print(f'Added {copies} copies of {title}, {isbn} to {store_name}.')
-
 def burn_book(isbn, verbose=False):
     """
     Remove book from both Inventory & Book table.
@@ -142,6 +87,9 @@ def burn_book(isbn, verbose=False):
         print(f"All copies of {title} have been burned.")
 
 def get_dummy_books():
+    """
+    Adds 11 default books to Books table.
+    """
     books = unpickle_dummy()[0]
 
     with Session() as session:
@@ -156,8 +104,10 @@ def get_dummy_books():
                 session.rollback()
 
 def get_dummy_authors():
+    """
+    Adds 12 default authors to Author table.
+    """
     authors = unpickle_dummy()[1]
-
     with Session() as session:
         for author_name in authors:
             split_name = author_name.split()
