@@ -9,8 +9,6 @@ Session = sessionmaker(bind=engine)  # used to manage transactions and interact 
 Base = declarative_base()  # model class represents a table in the database and its attributes represent columns
 
 #TODO:
-# Update to strict naming conventions (snake_case)
-# Reduce redundancy (DRY)
 # Improve constraints
 # Remove declarative_base() (Legacy code)
 
@@ -23,13 +21,18 @@ class Author(Base):
     surname = Column(String)
     birthdate = Column(String)
     books = relationship('Books', back_populates='author')
-    #books = relationship('Books', secondary='book_authors', back_populates='authors')
+    books = relationship('Books', secondary='book_authors', back_populates='authors') # Association table
 
-# Currently not in use
+    # Constraint which only allows unique name + surname combinations
+    # IF two authors have identical names, well, tough luck.
+    __table_args__ = (
+    UniqueConstraint('name', 'surname', name='uq_author_name_surname'),
+    )
+
+# Association table
 book_authors = Table('book_authors', Base.metadata,
     Column('book_id', Integer, ForeignKey('Books.isbn13')),
     Column('author_id', Integer, ForeignKey('Author.ID')),
-    Column('author_order', Integer),
 )
 
 class Books(Base):
@@ -42,7 +45,7 @@ class Books(Base):
     genre = Column(String, nullable=True)
     AuthID = Column(Integer, ForeignKey('Author.ID'))
     author = relationship('Author', back_populates='books')
-    #authors = relationship('Author', secondary='book_authors', back_populates='books')
+    authors = relationship('Author', secondary='book_authors', back_populates='books') # Association table
     inventory = relationship('Inventory', back_populates='book')
 
 
@@ -94,3 +97,21 @@ class Transaction(Base):
     book = relationship("Books")
     quantity = Column(Integer)
     total_cost = Column(Numeric(precision=2))
+
+if __name__ == '__main__':
+
+    Base.metadata.create_all(bind=engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    book = Books(isbn13='123456789', title='Example Book', language='English', price=20)
+    author1 = Author(name='John', surname='Doe')
+    author2 = Author(name='Jane', surname='Smith')
+
+    book.authors.append(author1)
+    book.authors.append(author2)
+
+    session.add(book)
+    session.commit()
+
+    session.close()
