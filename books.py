@@ -55,27 +55,33 @@ def get_author_name(author_id):
     else:
         return None
 
-def add_author(name, surname, birthdate, verbose=False):
+def add_author(name, surname, birthdate, wiki=None, verbose=False):
     with Session() as session:
+        existing_author = session.query(Author).filter_by(name=name, surname=surname).first()
+
+        if existing_author:
+            print(f'{name} {surname} already exists in the database. Skipping...')
+            return
+
         new_auth = Author(
             name=name,
             surname=surname,
-            birthdate=birthdate
+            birthdate=birthdate,
+            wiki=wiki
         )
         session.add(new_auth)
         session.commit()
 
-    if verbose:
+        if verbose:
             last_id = session.query(Author.ID).order_by(Author.ID.desc()).first()[0]
-            print(f'{name} has probably been added and received AuthID {last_id}.')
+            print(f'{name} {surname} added with AuthID {last_id}.\n')
 
 def add_new(title, language, price, release_date, author_id, isbn, genre, validate=False, verbose=False):
     """
     Add a book to Book table.
     """
-    
-    #TODO: checksum is broken, look into
-    isbn = str(isbn) 
+    # TODO: checksum is broken, look into
+    isbn = str(isbn)
     if validate:
         checksum = validate_isbn(isbn)
         if checksum != 0:
@@ -83,29 +89,36 @@ def add_new(title, language, price, release_date, author_id, isbn, genre, valida
         else:
             print('ISBN PASS!')
 
-    session = Session() #TODO Move this to outside function for performance improvements
+    session = Session()  # TODO: Move this to outside function for performance improvements
 
-    # Check if book with specified ISBN already exists
-    existing_book = session.query(Books).filter_by(isbn13=isbn).first()
-    if existing_book:
+    try:
+        # Check if book with specified ISBN already exists
+        existing_book = session.query(Books).filter_by(isbn13=isbn).first()
+        if existing_book:
+            print(f'Book with ISBN {isbn} already exists in the database.')
+            return
+
+        new_book = Books(
+            isbn13=isbn,
+            title=title,
+            language=language,
+            price=price,
+            release=release_date,
+            genre=genre,
+            AuthID=author_id
+        )
+        session.add(new_book)
+        session.commit()
+        if verbose:
+            print(f'Successfully registered {title}, {isbn} as book.')
+
+    except Exception as e:
+        session.rollback()
+        print(f'An error occurred while adding the book: {str(e)}')
+
+    finally:
         session.close()
-        raise ValueError(f'Book with ISBN {isbn} already exists in the database.')
 
-    new_book = Books(
-        isbn13=isbn,
-        title=title,
-        language=language,
-        price=price,
-        release=release_date,
-        genre=genre,
-        AuthID=author_id
-    )
-    session.add(new_book)
-    session.commit()
-    session.close()
-
-    if verbose:
-        print(f'Successfully registered {title}, {isbn} as book.')
 
 def burn_book(isbn, verbose=False):
     """
