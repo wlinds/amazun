@@ -1,14 +1,12 @@
 from models import *
 import os, books, customer
 import store_manager as store
-from Scripts.utils import titles_by_author, get_title, total_sales
+from Scripts.utils import titles_by_author, get_title, total_sales, drop_table
+from Scripts.author_crawler import *
 
 if __name__ == '__main__':
     main_db = 'amazun.db'
-
-    if os.path.exists(main_db):
-        os.remove(main_db)
-        print(f'{main_db} removed')
+    drop_table('Customer')
 
     Base.metadata.create_all(bind=engine)
 
@@ -52,6 +50,7 @@ if __name__ == '__main__':
     # Add customer
     customer.new_customer('Sixth Amorite King Hammurobi', 'King of the Old Babylonian Empire', 'Mušḫuššu', 'Babylon', 'Mesopotamia', 'none', 'amorite_king@anumail.com', verbose=True)
     customer.new_customer('Anna', 'Esperanto', 'Hjortronvägen 12', 'Göteborg', 'Västa Götaland', '431 42', 'anna@example.com', verbose=True)
+    customer.new_customer('Per', 'Bolund', 'Torpdalen 12', 'Stockholm', 'Stockholms län', '111 22', 'perra@gmail.com', verbose=True)
 
     # Add author
     books.add_author('God', 'Christ', datetime(1, 1, 1), verbose=True)
@@ -97,3 +96,25 @@ if __name__ == '__main__':
     books.find_all_by_author(8, verbose=True)
     books.find_all_by_author(11, verbose=True)
     books.find_all_by_author(1, verbose=True)
+
+
+    authors = crawl_wikipedia_authors(max_authors=20)
+
+    with Session() as session:
+        for author_info in authors:
+            split_name = author_info[0].split()
+            first_name = split_name[0]
+            last_name = " ".join(split_name[1:])
+            birthdate = author_info[1]
+
+            print(first_name, last_name, birthdate)
+
+            new_author = Author(
+                name=first_name,
+                surname=last_name,
+                birthdate=birthdate
+            )
+
+            session.add(new_author)
+    
+        session.commit()
