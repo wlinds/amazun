@@ -69,7 +69,7 @@ def process_author_page(author_url):
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # Filter for excluding movies (if infobox contains release)
-    stop_keywords = ['release', 'movie', 'film', 'Joakim Lamotte', 'statue']  # List of stop keywords
+    stop_keywords = ['release', 'movie', 'film', 'Joakim Lamotte', 'statue', 'play']  # List of stop keywords
     infobox = soup.find('table', {'class': 'infobox'})
     if infobox:
         found_keywords = [keyword for keyword in stop_keywords if keyword in infobox.text.lower()]
