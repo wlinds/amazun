@@ -28,30 +28,64 @@ def validate_isbn(n: str):
                + sum(int(ch) * 3 for ch in n[1::2]))
     return product % 10 == 0
 
+
+
 # Vy: ”TitlarPerFörfattare”
 def titles_by_author():
-    conn = sqlite3.connect('amazun.db')
-    c = conn.cursor()
+
+    session = Session()
 
     try:
-    # Create the view
-        c.execute('''CREATE VIEW TitlarPerFörfattare AS
-                        SELECT Author.Name || ' ' || Author.surname AS Namn,
-                               strftime('%Y', 'now') - strftime('%Y', Author.birthdate) AS Ålder,
-                               COUNT(DISTINCT Books.title) AS Titlar,
-                               SUM(Books.price * Inventory.stock) AS Lagervärde
-                        FROM Author
-                        JOIN Books ON Author.ID = Books.AuthID
-                        JOIN Inventory ON Books.isbn13 = Inventory.isbn13
-                        GROUP BY Author.name, Author.surname
-                        ORDER BY Namn''')
-        print("View created successfully.")
-    except sqlite3.OperationalError:
-        print("View already exists.")
-        
-    conn.commit()
-    conn.close()
+        # Create the view query
+        # This got incredibly long because I had to
+        # count books where an author is listed in the Books table directly,
+        # and also in the book_authors association table.
 
+        view_query = text('''
+            CREATE VIEW TitlarPerFörfattare AS
+            SELECT
+                Author.Name || ' ' || Author.surname AS Namn,
+                strftime('%Y', 'now') - strftime('%Y', Author.birthdate) AS Ålder,
+                COALESCE(t1.Titlar, 0) + COALESCE(t2.Titlar, 0) AS Titlar,
+                SUM(Books.price * Inventory.stock) AS Lagervärde
+            FROM
+                Author
+                JOIN Books ON Author.ID = Books.AuthID
+                JOIN Inventory ON Books.isbn13 = Inventory.isbn13
+                LEFT JOIN (
+                    SELECT
+                        Books.AuthID AS AuthorID,
+                        COUNT(DISTINCT Books.title) AS Titlar
+                    FROM
+                        Books
+                    GROUP BY
+                        Books.AuthID
+                ) AS t1 ON Author.ID = t1.AuthorID
+                LEFT JOIN (
+                    SELECT
+                        book_authors.author_id AS AuthorID,
+                        COUNT(DISTINCT Books.title) AS Titlar
+                    FROM
+                        book_authors
+                        JOIN Books ON book_authors.book_id = Books.isbn13
+                    GROUP BY
+                        book_authors.author_id
+                ) AS t2 ON Author.ID = t2.AuthorID
+            GROUP BY
+                Author.name, Author.surname
+            ORDER BY
+                Namn
+        ''')
+
+        # Execute the view query
+        session.execute(view_query)
+
+        print("View created successfully.")
+    except Exception as e:
+        print(f"Error creating view: {e}")
+
+    session.commit()
+    session.close()
 
 # Drop table OR view
 # https://www.sqlitetutorial.net/sqlite-create-view/
@@ -90,5 +124,4 @@ def total_sales():
         elif sales > 1_000_000:
             i = "Mr. Bezos.. We meet again."
 
-        #print(f'Total sales: {sales} coins. {i}')
         return f'Total sales: {sales} coins. {i}'
