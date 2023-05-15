@@ -1,10 +1,18 @@
 import requests, random
 from bs4 import BeautifulSoup
-from books import add_author
 import time # not used, perhaps should set delay somewhere...
+
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from books import add_author
 
 # Find authors and date of birth on Wikipedia by
 # random crawl through Writers subcategories
+
+# TODO: Check max_author, as it seem to go on past given limit.
+
+def crawl_wikipedia_authors(category_url='https://en.wikipedia.org/wiki/Category:Writers', subcategory_hierarchy=[], max_authors=100):
+    return crawl_category(category_url, subcategory_hierarchy, max_authors=max_authors)
 
 def crawl_category(category_url, subcategory_hierarchy=[], max_authors=100):
     base_url = 'https://en.wikipedia.org'
@@ -87,13 +95,3 @@ def process_author_page(author_url):
         add_author(first_name, last_name, date_of_birth, wiki=author_page_url, verbose=True)
 
     return None
-
-
-def crawl_wikipedia_authors(category_url='https://en.wikipedia.org/wiki/Category:Writers', subcategory_hierarchy=[], max_authors=100):
-    return crawl_category(category_url, subcategory_hierarchy, max_authors=max_authors)
-
-
-if __name__ == '__main__':
-    while True:
-        a = crawl_wikipedia_authors()
-        print(a)
