@@ -9,12 +9,43 @@ database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'amazun.
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
 db = SQLAlchemy(app)
 
+@app.route('/base')
+def base():
+    return render_template('base.html')
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
 
     welcome = welcome_message(username='Shiva')
-
     return render_template('index.html', message=welcome)
+
+@app.route('/inventory', methods=['GET', 'POST'])
+def inventory():
+    if request.method == 'POST':
+        selected_isbn = request.form.get('isbn')
+        selected_store_id = request.form.get('store_id')
+        selected_quantity = request.form.get('quantity')
+
+        # Call add_to_inventory()
+        store_manager.add_to_inventory(selected_isbn, selected_store_id, int(selected_quantity), verbose=True)
+
+    inventory_table = db.session.query(Inventory).all()
+
+    session = Session()
+
+    all_books = session.query(Books).all()
+    books_data = [{'isbn': book.isbn13, 'title': book.title} for book in all_books]
+
+    stores = session.query(Store).all()
+    stores_data = [{'id': store.id, 'name': store.store_name} for store in stores]
+
+    session.close()
+
+    return render_template('inventory.html',
+                           results=inventory_table,
+                           books=books_data,
+                           stores=stores_data)
 
 
 @app.route('/transactions', methods=['GET', 'POST'])

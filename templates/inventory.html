@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Inventory</title>
+	<style>
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		th, td {
+			text-align: left;
+			padding: 8px;
+			border-bottom: 1px solid #ddd;
+		}
+
+		th {
+			background-color: #f2f2f2;
+		}
+
+		.container {
+			display: flex;
+			justify-content: flex-end;
+			padding: 10px;
+			margin-top: 20px;
+		}
+
+		.total-sales {
+			font-size: 18px;
+			font-weight: bold;
+			text-align: right;
+		}
+	</style>
+</head>
+<body>
+    <h1>Inventory</h1>
+
+    <h2>Add to Inventory</h2>
+
+    <form action="/inventory" method="post">
+        <label for="isbn">ISBN:</label>
+        <select id="isbn" name="isbn">
+            {% for book in books %}
+            <option value="{{ book.isbn }}">{{ book.title }}</option>
+            {% endfor %}
+        </select><br>
+
+        <label for="store_id">Store ID:</label>
+        <select id="store_id" name="store_id">
+            {% for store in stores %}
+            <option value="{{ store.id }}">{{ store.name }}</option>
+            {% endfor %}
+        </select><br>
+
+        <label for="quantity">Quantity:</label>
+        <input type="text" id="quantity" name="quantity"><br>
+
+        <input type="submit" value="Add to Inventory">
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Store ID</th>
+                <th>ISBN</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inventory in results %}
+            <tr>
+                <td>{{ inventory.StoreID }}</td>
+                <td>{{ inventory.isbn13 }}</td>
+                <td>{{ inventory.stock }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
