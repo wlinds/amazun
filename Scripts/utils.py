@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3 # only used in validate_isbn --> remove?
 from sqlalchemy.exc import SQLAlchemyError
 
 import sys, os
@@ -167,4 +167,5 @@ def remove_null_rows(table_name, column_names, verbose=False):
             raise e
 
 if __name__ == '__main__':
-    remove_null_rows('Customer', ['name', 'surname', 'address', 'city', 'state', 'zipcode', 'email'])
+    update_changelog(add)
+    #remove_null_rows('Customer', ['name', 'surname', 'address', 'city', 'state', 'zipcode', 'email'])
