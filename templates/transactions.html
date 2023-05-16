@@ -9,7 +9,7 @@
     {% block content %}
 		<h1>Transactions</h1>
 	  
-		<h2>New Purchase</h2>
+		<h2>New transaction</h2>
 	  
 		<form action="/transactions" method="post">
 		  <label for="isbn">ISBN:</label>
@@ -40,10 +40,9 @@
 			{% endfor %}
 		  </select><br>
 	  
-		  <input type="submit" value="Purchase">
+		  <input type="submit" value="Confirm">
+
 		</form>
-	  
-		<p>{{ message }}</p>
 	  
 	<table>
 		<thead>
