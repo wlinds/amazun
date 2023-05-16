@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Transactions</title>
+	<style>
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		th, td {
+			text-align: left;
+			padding: 8px;
+			border-bottom: 1px solid #ddd;
+		}
+
+		th {
+			background-color: #f2f2f2;
+		}
+
+		.container {
+			display: flex;
+			justify-content: flex-end;
+			padding: 10px;
+			margin-top: 20px;
+		}
+
+		.total-sales {
+			font-size: 18px;
+			font-weight: bold;
+			text-align: right;
+		}
+	</style>
+</head>
+<body>
+
+		<h1>Transactions</h1>
+	  
+
+		<h2>index</h2>
+
+		<p>{{ message }}</p>
+	  
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Transaction Date</th>
+				<th>Customer ID</th>
+				<th>ISBN13</th>
+				<th>Store ID</th>
+				<th>Quantity</th>
+				<th>Total Cost</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for transaction in results %}
+			<tr>
+				<td>{{ transaction.id }}</td>
+				<td>{{ transaction.transaction_date }}</td>
+				<td>{{ transaction.CustomerID }}</td>
+				<td>{{ transaction.isbn13 }}</td>
+				<td>{{ transaction.StoreID }}</td>
+				<td>{{ transaction.quantity }}</td>
+				<td>{{ transaction.total_cost }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<div class="container">
+		<p class="total-sales">{{ total_sales }}</p>
+	</div>
+</body>
+</html>
