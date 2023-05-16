@@ -1,4 +1,9 @@
 import sqlite3
+from sqlalchemy.exc import SQLAlchemyError
+
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from models import *
 import pickle, random, time
 
@@ -142,3 +147,24 @@ def welcome_message(username='user'):
 
     greeting = random.choice(phrase_1)
     return greeting.capitalize() + ' ' + username + "!"
+
+def remove_null_rows(table_name, column_names, verbose=False):
+    with Session() as session:
+        try:
+            table = globals()[table_name]
+            filter_conditions = [getattr(table, column_name) == None for column_name in column_names]
+            rows_to_delete = session.query(table).filter(*filter_conditions).all()
+
+            for row in rows_to_delete:
+                session.delete(row)
+            
+            session.commit()
+
+            if verbose:
+                print(f'{len(rows_to_delete)} rows removed from {table_name} where {column_names} are null.')
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise e
+
+if __name__ == '__main__':
+    remove_null_rows('Customer', ['name', 'surname', 'address', 'city', 'state', 'zipcode', 'email'])
