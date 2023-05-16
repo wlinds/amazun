@@ -49,7 +49,6 @@ class Books(Base):
     authors = relationship('Author', secondary='book_authors', back_populates='books') # Association table
     inventory = relationship('Inventory', back_populates='book')
 
-
 class Store(Base):
     __tablename__ = 'Store'
     id = Column(Integer, primary_key=True)
@@ -81,6 +80,10 @@ class Customer(Base):
     zipcode = Column(String)
     email = Column(String)
 
+    created_at = Column(DateTime, default=datetime.now)
+    deleted_at = Column(DateTime, nullable=True)
+
+
 class CustomerBooks(Base):
     __tablename__ = 'Customer_Books'
     customer_id = Column(Integer, ForeignKey('Customer.ID'), primary_key=True)
@@ -98,6 +101,15 @@ class Transaction(Base):
     book = relationship("Books")
     quantity = Column(Integer)
     total_cost = Column(Numeric(precision=2))
+
+class ChangeLog(Base):
+    __tablename__ = 'changelog'
+
+    id = Column(Integer, primary_key=True)
+    table_name = Column(String)
+    action = Column(String)
+    customer_id = Column(Integer)
+    timestamp = Column(DateTime, default=datetime.now)
 
 if __name__ == '__main__':
 
