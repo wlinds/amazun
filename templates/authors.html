@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Customers</title>
+	<style>
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		th, td {
+			text-align: left;
+			padding: 8px;
+			border-bottom: 1px solid #ddd;
+		}
+
+		th {
+			background-color: #f2f2f2;
+		}
+
+		.container {
+			display: flex;
+			justify-content: flex-end;
+			padding: 10px;
+			margin-top: 20px;
+		}
+
+		.total-sales {
+			font-size: 18px;
+			font-weight: bold;
+			text-align: right;
+		}
+	</style>
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block content %}
+    <h1>Authors</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Birthdate</th>
+                <th>Wiki</th>
+                <th>Manage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for a in results %}
+                <td>{{ a.ID }}</td>
+                <td>{{ a.name }}</td>
+                <td>{{ a.surname }}</td>
+                <td>{{ a.birthdate }}</td>
+                <td><a href={{ a.wiki }}> {{ a.wiki }} </a></td>
+                <td>
+                    <form action="{{ url_for('delete_author') }}" method="post">
+                        <input type="hidden" name="author_id" value="{{ a.ID }}">
+                        <button type="submit">Delete</button>
+                        <button type="submit">Edit</button>
+                    </form>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endblock %}
+</body>
+</html>
