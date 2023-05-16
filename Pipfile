@@ -9,6 +9,8 @@ bs4 = "*"
 sqlalchemy = "*"
 flask = "*"
 flask-sqlalchemy = "*"
+pydot = "*"
+graphviz = "*"
 
 [dev-packages]
 
