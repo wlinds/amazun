@@ -160,9 +160,23 @@ def delete_customer():
 
 @app.route('/authors', methods=['GET', 'POST'])
 def authors():
-    author_table = db.session.query(Author).all()
-    return render_template('authors.html',
-                           results=author_table)
+    sort_by = request.args.get('sort_by')  # Get the sorting parameter from the query string
+
+    # Retrieve the author table from the database
+    author_table = db.session.query(Author)
+
+    # Apply sorting based on the selected parameter
+    if sort_by == 'id':
+        author_table = author_table.order_by(Author.ID)
+    elif sort_by == 'name':
+        author_table = author_table.order_by(Author.name)
+    elif sort_by == 'birthdate':
+        author_table = author_table.order_by(Author.birthdate)
+
+    # Execute the query and retrieve the sorted results
+    sorted_authors = author_table.all()
+
+    return render_template('authors.html', results=sorted_authors)
 
 @app.route('/delete_author', methods=['POST'])
 def delete_author():
