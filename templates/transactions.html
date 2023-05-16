@@ -33,7 +33,8 @@
 	</style>
 </head>
 <body>
-
+    {% extends 'base.html' %}
+    {% block content %}
 		<h1>Transactions</h1>
 	  
 		<h2>New Purchase</h2>
@@ -102,5 +103,6 @@
 	<div class="container">
 		<p class="total-sales">{{ total_sales }}</p>
 	</div>
+	{% endblock %}
 </body>
 </html>

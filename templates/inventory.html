@@ -33,9 +33,11 @@
 	</style>
 </head>
 <body>
+    {% extends 'base.html' %}
+    {% block content %}
     <h1>Inventory</h1>
 
-    <h2>Add to Inventory</h2>
+    <h2>Order books</h2>
 
     <form action="/inventory" method="post">
         <label for="isbn">ISBN:</label>
@@ -55,7 +57,7 @@
         <label for="quantity">Quantity:</label>
         <input type="text" id="quantity" name="quantity"><br>
 
-        <input type="submit" value="Add to Inventory">
+        <input type="submit" value="Order">
     </form>
 
     <table>
@@ -76,5 +78,6 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endblock %}
 </body>
 </html>
