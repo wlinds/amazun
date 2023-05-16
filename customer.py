@@ -2,6 +2,7 @@
 from models import *
 from Scripts.utils import unpickle_dummy
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import SQLAlchemyError
 
 def purchase_book(isbn, store_id, customer_id, quantity):
     with Session() as session:
@@ -86,6 +87,23 @@ def new_customer(name, surname, address, city, state, zipcode, email, verbose=Fa
     if verbose:
         print(f'{name} has successfully been registered as customer.')
 
+
+def remove_customer(customer_id, verbose=False):
+    with Session() as session:
+        try:
+            customer = session.query(Customer).filter_by(id=customer_id).first()
+            if customer:
+                session.delete(customer)
+                session.commit()
+
+                if verbose:
+                    print(f'{customer_id=} deleted.')
+            else:
+                if verbose:
+                    print(f'{customer_id=} does not exist.')
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise e
 
 # -- TODO: Where to put this? Utils? Also: make it just one function? -- #
 def get_title(isbn):
