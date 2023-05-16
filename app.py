@@ -1,7 +1,7 @@
 from models import *
 import os, store_manager, books, customer
 from Scripts.utils import titles_by_author, get_title, total_sales, welcome_message
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -12,7 +12,6 @@ db = SQLAlchemy(app)
 @app.route('/base')
 def base():
     return render_template('base.html')
-
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -82,6 +81,34 @@ def transactions():
                            books=books_data,
                            stores=stores_data,
                            customers=customers_data)
+
+@app.route('/customers', methods=['GET', 'POST'])
+def customers():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        surname = request.form.get('surname')
+        address = request.form.get('address')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        zipcode = request.form.get('zipcode')
+        email = request.form.get('email')
+
+        customer.new_customer(name, surname, address, city, state, zipcode, email, verbose=True)
+
+    customer_table = db.session.query(Customer).all()
+
+    return render_template('customers.html',
+                           results=customer_table)
+
+
+@app.route('/delete_customer', methods=['POST'])
+def delete_customer():
+    customer_id = request.form.get('customer_id')
+    print(f"Customer ID: {customer_id}")
+    customer.remove_customer(customer_id, verbose=True)
+
+    # Redirect to after deletion
+    return redirect('/customers')
 
 if __name__ == '__main__':
     Base.metadata.create_all(bind=engine)
