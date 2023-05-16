@@ -75,17 +75,49 @@ def get_dummy_cst():
 
     with Session() as session:
         for name, surname, email, address, city, state, zipcode in customer_data:
+            existing_customer = session.query(Customer).filter_by(email=email).first()
+            if existing_customer:
+                continue  # Skip adding the customer if entry already exist
             new_customer = Customer(name=name, surname=surname, address=address, city=city, state=state, zipcode=zipcode, email=email)
             session.add(new_customer)
+            session.commit()
+
+            # Create a new entry in the ChangeLog table for customer added
+            changelog_entry = ChangeLog(
+                table_name='Customer',
+                action='added',
+                customer_id=new_customer.ID
+            )
+            session.add(changelog_entry)
             session.commit()
 
 def new_customer(name, surname, address, city, state, zipcode, email, verbose=False):
     with Session() as session:
         new_customer = Customer(name=name, surname=surname, address=address, city=city, state=state, zipcode=zipcode, email=email)
+        if verbose:
+            print(f'Checking existing customer for email: {email}')
+        existing_customer = session.query(Customer).filter_by(email=email).first()
+        if existing_customer:
+            if verbose:
+                print('Email already exist.')
+            return None
+
         session.add(new_customer)
         session.commit()
+
+        # TODO: DRY -- repeated in get_dummy
+        changelog_entry = ChangeLog(
+            table_name='Customer',
+            action='added',
+            customer_id=new_customer.ID
+        )
+        session.add(changelog_entry)
+        session.commit()
+
     if verbose:
         print(f'{name} has successfully been registered as customer.')
+
+        
 
 
 def remove_customer(customer_id, remove_all_null=False, verbose=False):
@@ -100,6 +132,15 @@ def remove_customer(customer_id, remove_all_null=False, verbose=False):
 
                 if verbose:
                     print(f'{customer_id=} deleted.')
+
+                # Create a new entry in the ChangeLog table for customer deleted
+                changelog_entry = ChangeLog(
+                    table_name='Customer',
+                    action='deleted',
+                    customer_id=customer_id
+                )
+                session.add(changelog_entry)
+                session.commit()
 
             else:
                 if verbose:

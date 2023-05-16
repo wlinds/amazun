@@ -6,7 +6,8 @@ from Scripts.author_crawler import *
 
 if __name__ == '__main__':
     main_db = 'amazun.db'
-    drop_table('Customer')
+    #drop_table('Customer')
+    #drop_table('changelog')
 
     Base.metadata.create_all(bind=engine)
 
@@ -116,5 +117,4 @@ if __name__ == '__main__':
             )
 
             session.add(new_author)
-    
         session.commit()
