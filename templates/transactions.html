@@ -2,35 +2,7 @@
 <html>
 <head>
 	<title>Transactions</title>
-	<style>
-		table {
-			border-collapse: collapse;
-			width: 100%;
-		}
-
-		th, td {
-			text-align: left;
-			padding: 8px;
-			border-bottom: 1px solid #ddd;
-		}
-
-		th {
-			background-color: #f2f2f2;
-		}
-
-		.container {
-			display: flex;
-			justify-content: flex-end;
-			padding: 10px;
-			margin-top: 20px;
-		}
-
-		.total-sales {
-			font-size: 18px;
-			font-weight: bold;
-			text-align: right;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
 </head>
 <body>
     {% extends 'base.html' %}
