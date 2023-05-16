@@ -1,6 +1,6 @@
 # For customers
 from models import *
-from Scripts.utils import unpickle_dummy
+from Scripts.utils import unpickle_dummy, remove_null_rows
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -88,16 +88,19 @@ def new_customer(name, surname, address, city, state, zipcode, email, verbose=Fa
         print(f'{name} has successfully been registered as customer.')
 
 
-def remove_customer(customer_id, verbose=False):
+def remove_customer(customer_id, remove_all_null=False, verbose=False):
     with Session() as session:
         try:
-            customer = session.query(Customer).filter_by(id=customer_id).first()
+            customer = session.query(Customer).filter_by(ID=customer_id).first()
             if customer:
                 session.delete(customer)
                 session.commit()
+                if remove_all_null:
+                    remove_null_rows('Customer', ['name', 'surname', 'address', 'city', 'state', 'zipcode', 'email'], verbose=verbose)
 
                 if verbose:
                     print(f'{customer_id=} deleted.')
+
             else:
                 if verbose:
                     print(f'{customer_id=} does not exist.')
