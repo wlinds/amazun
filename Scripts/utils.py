@@ -1,6 +1,6 @@
 import sqlite3
 from models import *
-import pickle
+import pickle, random, time
 
 def get_title(isbn): # Not sure if this should be in util or in other module
         return Session().query(Books.title).filter_by(isbn13=isbn).scalar()
@@ -125,3 +125,17 @@ def total_sales():
             i = "Mr. Bezos.. We meet again."
 
         return f'Total sales: {sales} coins. {i}'
+
+def welcome_message(username='user'):
+    current_hour = int(time.strftime('%H'))
+
+    phrase_1 = ['hej', 'tja', 'tjena', 'hallåj', 'tjabba', 'yo']
+
+    if current_hour < 5 or current_hour >= 19:
+        phrase_1 = ['god kväll']
+    
+    elif current_hour > 5 or current_hour <= 9:
+        phrase_1 = ['god morgon']   
+
+    greeting = random.choice(phrase_1)
+    return greeting.capitalize() + ' ' + username + "!"
