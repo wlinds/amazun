@@ -189,6 +189,30 @@ def get_dummy_authors():
                 logging.warning(f"Author '{author_name}' already exists.")
                 session.rollback()
 
+
+def remove_author(author_id, remove_all_null=False, verbose=False):
+    # Very similar to remove_customer() in books.py. TODO: merge into one function
+
+    with Session() as session:
+        try:
+            author = session.query(Author).filter_by(ID=author_id).first()
+            if author:
+                session.delete(author)
+                session.commit()
+                if remove_all_null:
+                    remove_null_rows('Author', ['name', 'surname', 'birthdate', 'wiki'], verbose=verbose)
+
+                if verbose:
+                    print(f'{author_id=} deleted.')
+
+            else:
+                if verbose:
+                    print(f'{author_id=} does not exist.')
+                    
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise e
+
 if __name__ == '__main__':
     main_db = 'amazun.db'
 
