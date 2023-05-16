@@ -187,6 +187,15 @@ def delete_author():
     # Redirect to after deletion
     return redirect('/authors')
 
+@app.route('/search_book', methods=['GET', 'POST'])
+def search():
+    results = None
+    if request.method == 'POST':
+        search_term = request.form.get('search_term')
+        results = store_manager.search_books(search_term)
+    return render_template('search_book.html', results=results)
+
+
 if __name__ == '__main__':
 
     #drop_table('users')

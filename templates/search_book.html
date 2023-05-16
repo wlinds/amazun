@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block content %}
+    <h1>Search books</h1>
+    <form method="POST" action="/search_book">
+        <input type="text" name="search_term" placeholder="Enter search term">
+        <button type="submit">Find books</button>
+    </form>
+
+    {% if results %}
+        <h2>Search Results</h2>
+        <ul>
+            {% for title, stores in results.items() %}
+                <li>{{ title }}</li>
+                <ul>
+                    {% for store, stock in stores %}
+                        <li>{{ store }} - Stock: {{ stock }}</li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </ul>
+    {% else %}
+        {% if request.method == 'POST' %}
+            <p>No results found.</p>
+        {% endif %}
+    {% endif %}
+    {% endblock %}
+</body>
+</html>
