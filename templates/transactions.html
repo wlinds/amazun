@@ -9,8 +9,9 @@
     {% block content %}
 		<h1>Transactions</h1>
 	  
-		<h2>New transaction</h2>
-	  
+	<h2>New transaction</h2>
+	  <div class="input-field">
+		<div>
 		<form action="/transactions" method="post">
 		  <label for="isbn">ISBN:</label>
 		  <select id="isbn" name="isbn">
@@ -18,13 +19,16 @@
 			  <option value="{{ book.isbn }}">{{ book.title }}</option>
 			{% endfor %}
 		  </select><br>
-	  
+	</div>
+	<div>  
 		  <label for="store_id">Store ID:</label>
 		  <select id="store_id" name="store_id">
-			{% for store in stores %}
+			  {% for store in stores %}
 			  <option value="{{ store.id }}">{{ store.name }}</option>
-			{% endfor %}
-		  </select><br>
+			  {% endfor %}
+			</select><br>
+	</div>
+	<div>
 	  
 		  <label for="customer_id">Customer ID:</label>
 		  <select id="customer_id" name="customer_id">
@@ -32,18 +36,20 @@
 			  <option value="{{ customer.id }}">{{ customer.name }}</option>
 			{% endfor %}
 		  </select><br>
-	  
-		  <label for="quantity">Quantity:</label>
-		  <select id="quantity" name="quantity">
+	</div>
+	<div>
+		<label for="quantity">Quantity:</label>
+		<select id="quantity" name="quantity">
 			{% for i in range(1, 11) %}
-			  <option value="{{ i }}">{{ i }}</option>
+			<option value="{{ i }}">{{ i }}</option>
 			{% endfor %}
-		  </select><br>
-	  
+		</select><br>
+	</div>
+
 		  <input type="submit" value="Confirm">
 
 		</form>
-	  
+	</div>
 	<table>
 		<thead>
 			<tr>

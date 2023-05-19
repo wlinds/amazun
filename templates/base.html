@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
     <header>
+    <div>
 		<a href="/dashboard">home</a>
         <a href="/transactions">transactions</a>
 		<a href="/inventory">inventory</a>
 		<a href="/customers">customers</a>
 		<a href="/authors">authors</a>
 		<a href="/search_book">search books</a>
+    </div>
     </header>
 
     <div class="content">

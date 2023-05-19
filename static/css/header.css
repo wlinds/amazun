@@ -1,0 +1,66 @@
+/* Reset styles for consistency across browsers */
+html,
+body,
+div,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+img,
+ul,
+ol,
+li,
+form,
+label,
+header {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font-family: 'Arial', sans-serif;
+  vertical-align: baseline;
+}
+
+/* Global styles */
+body {
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* Header styles */
+header {
+  background-color: #222;
+  padding: 20px;
+}
+
+header div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+header a {
+  color: #fff;
+  text-decoration: none;
+  margin: 0 10px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
+header a:hover {
+  background-color: #444;
+}
+
+/* Content styles */
+.content {
+  margin: 20px;
+}
+
+/* Your custom styles go here */
