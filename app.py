@@ -4,12 +4,18 @@ from Scripts.utils import titles_by_author, get_title, total_sales, welcome_mess
 from flask import Flask, render_template, request, redirect, session, current_app, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from my_credentials import cstring2
+from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
-database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'amazun.db'))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
+#database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'amazun.db'))
+#app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = cstring2
+engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 db = SQLAlchemy(app)
 
 # Define the User model
@@ -20,18 +26,28 @@ class User(db.Model):
     password = db.Column(db.String(256))
 
     def set_password(self, password):
-        self.password = generate_password_hash(password)  # Update this line
+        if isinstance(password, bytes):
+            password = password.decode('utf-8')
+        self.password = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
 def create_user(username, password):
-     #TODO: existing user exception handling (caused by unique constraint)
-    with current_app.app_context():
-        user = User(username=username)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
+    with app.app_context():
+        try:
+            user = User(username=username)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+
+        except IntegrityError:
+            db.session.rollback()
+            print(f"User with username '{username}' already exists.")
+
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -197,12 +213,12 @@ def search():
 
 
 if __name__ == '__main__':
-
-    #drop_table('users')
+    Base.metadata.create_all(bind=engine)
 
     with app.app_context():
         db.create_all()
-        #create_user('admin', 'supersafe') #TODO: existing user exception handling (caused by unique constraint)
+        create_user('admin2', 'supersafe') #TODO: existing user exception handling (caused by unique constraint)
 
     Base.metadata.create_all(bind=engine)
     app.run(debug=True)
+    
