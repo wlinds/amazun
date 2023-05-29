@@ -11,6 +11,8 @@ flask = "*"
 flask-sqlalchemy = "*"
 pydot = "*"
 graphviz = "*"
+pyodbc = "*"
+pymssql = "*"
 
 [dev-packages]
 

@@ -214,11 +214,13 @@ def remove_author(author_id, remove_all_null=False, verbose=False):
             raise e
 
 if __name__ == '__main__':
-    main_db = 'amazun.db'
+    #main_db = 'amazun.db'
 
     Base.metadata.create_all(bind=engine)
 
     print(get_author_name(2))
+    
+    add_new('Pyton for dummies', 'English', '9.99', datetime(2015, 10, 29), 'none', 9781473214714, 'Educational', verbose=True)
 
 
     # These functions are still a bit wonky TODO

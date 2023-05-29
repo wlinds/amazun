@@ -5,11 +5,14 @@ from Scripts.utils import titles_by_author, get_title, total_sales, drop_table
 from Scripts.author_crawler import *
 
 if __name__ == '__main__':
-    main_db = 'amazun.db'
+    #main_db = 'amazun.db' #Used for SQLite
+
+    Base.metadata.create_all(bind=engine)
+
     #drop_table('Customer')
     #drop_table('changelog')
 
-    Base.metadata.create_all(bind=engine)
+    #Base.metadata.create_all(bind=engine)
 
     store.get_dummy_stores()
     books.get_dummy_books()
@@ -57,7 +60,7 @@ if __name__ == '__main__':
     books.add_author('God', 'Christ', datetime(1, 1, 1), verbose=True)
 
     # Add book to existence (add to book table)
-    books.add_new('Pyton for dummies', 'English', '9.99', datetime(2015, 10, 29), 'null', 9781473214714, 'Educational', verbose=True)
+    books.add_new('Pyton for dummies', 'English', '9.99', datetime(2015, 10, 29), '25', 9781473214714, 'Educational', verbose=True)
     store.add_to_inventory(9781473214714, 2, 200, verbose=True)
 
     books.add_new('The Old Testament (Original)', 'English', '9.99', datetime(2015, 10, 29), '1', 9780195378405, 'Artefact', verbose=True)
@@ -78,6 +81,8 @@ if __name__ == '__main__':
 
 
     # Multiple authors, (association table in models.py) TODO: Make this a function
+    books.add_new('Good Omens', 'English', '20', datetime(2015, 10, 29), '12', 9781473214712, 'Fantasy', verbose=True)
+
     session = Session()
     book = session.query(Books).filter_by(isbn13='9781473214712').first()
     author1 = session.query(Author).filter_by(name='Terry', surname='Pratchett').first()
@@ -91,7 +96,9 @@ if __name__ == '__main__':
 
     # Add book to store inventory by searching title
     store.add_to_inventory(books.get_isbn('Good Omens'), 2, 10, verbose=True)
-    # Maybe the add_to_inventory should be modified to take either isbn or title as args instead.
+    #Maybe the add_to_inventory should be modified to take either isbn or title as args instead.
+
+    # ---------------------------------------------------------------------------------------------- # 
 
     # Find all books by author
     books.find_all_by_author(8, verbose=True)
