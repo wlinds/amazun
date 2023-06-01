@@ -41,45 +41,20 @@ def titles_by_author():
     session = Session()
 
     try:
-        # Create the view query
-        # This got incredibly long because I had to
-        # count books where an author is listed in the Books table directly,
-        # and also in the book_authors association table.
 
         view_query = text('''
             CREATE VIEW TitlarPerFörfattare AS
             SELECT
-                Author.Name || ' ' || Author.surname AS Namn,
-                strftime('%Y', 'now') - strftime('%Y', Author.birthdate) AS Ålder,
-                COALESCE(t1.Titlar, 0) + COALESCE(t2.Titlar, 0) AS Titlar,
+                Author.Name + ' ' + Author.surname AS Namn,
+                DATEDIFF(year, Author.birthdate, GETDATE()) AS Ålder,
+                COUNT(DISTINCT CASE WHEN Books.AuthID IS NOT NULL THEN Books.title END) AS Titlar,
                 SUM(Books.price * Inventory.stock) AS Lagervärde
             FROM
                 Author
                 JOIN Books ON Author.ID = Books.AuthID
                 JOIN Inventory ON Books.isbn13 = Inventory.isbn13
-                LEFT JOIN (
-                    SELECT
-                        Books.AuthID AS AuthorID,
-                        COUNT(DISTINCT Books.title) AS Titlar
-                    FROM
-                        Books
-                    GROUP BY
-                        Books.AuthID
-                ) AS t1 ON Author.ID = t1.AuthorID
-                LEFT JOIN (
-                    SELECT
-                        book_authors.author_id AS AuthorID,
-                        COUNT(DISTINCT Books.title) AS Titlar
-                    FROM
-                        book_authors
-                        JOIN Books ON book_authors.book_id = Books.isbn13
-                    GROUP BY
-                        book_authors.author_id
-                ) AS t2 ON Author.ID = t2.AuthorID
             GROUP BY
-                Author.name, Author.surname
-            ORDER BY
-                Namn
+                Author.Name, Author.surname, Author.birthdate
         ''')
 
         # Execute the view query
