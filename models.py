@@ -1,7 +1,9 @@
 from sqlalchemy import *
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
-from my_credentials import cstring2
+
+# Connection string
+cstring2 = "mssql+pyodbc://SA:superSafe123@localhost:1433/amazun?driver=ODBC+Driver+17+for+SQL+Server"
 
 # Define database connection
 # This has to be created first using Azure Data Studio or similar, maybe possible to do with sqlalchemy straight away, idk.
