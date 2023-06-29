@@ -2,7 +2,7 @@
 
 ![logo, copyright infingement intended](Assets/Img/fancy_logo.png)
 
- No unionizing pls. SQL Project for <a href="https://github.com/wlinds/ITHS-AI22-RDBMS">ITHS SQL & DB course</a>.
+SQL Project for <a href="https://github.com/wlinds/ITHS-AI22-RDBMS">ITHS SQL & DB course</a>. *Now unionized!*
 
 
 Notes available to read here: [devlog](notes.ipynb)
