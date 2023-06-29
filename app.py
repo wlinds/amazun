@@ -4,7 +4,6 @@ from Scripts.utils import titles_by_author, get_title, total_sales, welcome_mess
 from flask import Flask, render_template, request, redirect, session, current_app, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from my_credentials import cstring2
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 
@@ -14,9 +13,14 @@ app.secret_key = secrets.token_hex(16)
 #database_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'amazun.db'))
 #app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
 
+cstring2 = "mssql+pyodbc://SA:superSafe123@localhost:1433/amazun?driver=ODBC+Driver+17+for+SQL+Server"
 app.config['SQLALCHEMY_DATABASE_URI'] = cstring2
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 db = SQLAlchemy(app)
+
+# Access the user session
+def check_login():
+    return session.get('user_id'), session.get('username')
 
 # Define the User model
 class User(db.Model):
@@ -58,7 +62,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user is not None and user.check_password(password):
-            flash('Successful authentication')
+            flash('Successful authentication') #TODO: this is SOMETIMES displayed when entering incorrect info?
             session['user_id'] = user.id
             session['username'] = user.username
             
@@ -68,15 +72,13 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/base')
-def base():
-    return render_template('base.html')
+# @app.route('/base') # Can probably be removed?
+# def base():
+#     return render_template('base.html')
 
 @app.route('/dashboard')
 def dashboard():
-    # Access the user session
-    user_id = session.get('user_id')
-    username = session.get('username')
+    user_id, username = check_login()
 
     if user_id:
         welcome = welcome_message(username)
@@ -87,7 +89,9 @@ def dashboard():
 
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():
-    if request.method == 'POST':
+    user_id, username = check_login()
+    
+    if request.method == 'POST' and user_id:
         selected_isbn = request.form.get('isbn')
         selected_store_id = request.form.get('store_id')
         selected_quantity = request.form.get('quantity')
@@ -95,26 +99,33 @@ def inventory():
         # Call add_to_inventory()
         store_manager.add_to_inventory(selected_isbn, selected_store_id, int(selected_quantity), verbose=True)
 
-    inventory_table = db.session.query(Inventory).all()
+    if user_id:
+        inventory_table = db.session.query(Inventory).all()
 
-    session = Session()
+        session = Session()
 
-    all_books = session.query(Books).all()
-    books_data = [{'isbn': book.isbn13, 'title': book.title} for book in all_books]
+        all_books = session.query(Books).all()
+        books_data = [{'isbn': book.isbn13, 'title': book.title} for book in all_books]
 
-    stores = session.query(Store).all()
-    stores_data = [{'id': store.id, 'name': store.store_name} for store in stores]
+        stores = session.query(Store).all()
+        stores_data = [{'id': store.id, 'name': store.store_name} for store in stores]
 
-    session.close()
+        session.close()
 
-    return render_template('inventory.html',
-                           results=inventory_table,
-                           books=books_data,
-                           stores=stores_data)
+        return render_template('inventory.html',
+                               results=inventory_table,
+                               books=books_data,
+                               stores=stores_data)
+    else:
+        # User is not authenticated, redirect
+        return redirect(url_for('login'))
+
 
 @app.route('/transactions', methods=['GET', 'POST'])
 def transactions():
-    if request.method == 'POST':
+    user_id, username = check_login()
+
+    if request.method == 'POST' and user_id:
         selected_isbn = request.form.get('isbn')
         selected_store_id = request.form.get('store_id')
         selected_customer_id = request.form.get('customer_id')
@@ -123,33 +134,40 @@ def transactions():
         # Call purchase_book()
         customer.purchase_book(selected_isbn, selected_store_id, selected_customer_id, int(selected_quantity))
 
-    transaction_table = db.session.query(Transaction).all()
-    sales_info = total_sales()
+    if user_id:
+        transaction_table = db.session.query(Transaction).all()
+        sales_info = total_sales()
 
-    session = Session()
+        session = Session()
 
-    # Get drop down data for customer, books and stores
-    books = session.query(Books).all()
-    books_data = [{'isbn': book.isbn13, 'title': book.title} for book in books]
+        # Get drop down data for customer, books and stores
+        books = session.query(Books).all()
+        books_data = [{'isbn': book.isbn13, 'title': book.title} for book in books]
 
-    stores = session.query(Store).all()
-    stores_data = [{'id': store.id, 'name': store.store_name} for store in stores]
+        stores = session.query(Store).all()
+        stores_data = [{'id': store.id, 'name': store.store_name} for store in stores]
 
-    customers = session.query(Customer).all()
-    customers_data = [{'id': customer.ID, 'name': customer.name} for customer in customers]
+        customers = session.query(Customer).all()
+        customers_data = [{'id': customer.ID, 'name': customer.name} for customer in customers]
 
-    session.close()
+        session.close()
 
-    return render_template('transactions.html',
+        return render_template('transactions.html',
                            results=transaction_table,
                            total_sales=sales_info,
                            books=books_data,
                            stores=stores_data,
                            customers=customers_data)
+    else:
+    # User is not authenticated, redirect
+        return redirect(url_for('login'))
+
 
 @app.route('/customers', methods=['GET', 'POST'])
 def customers():
-    if request.method == 'POST':
+    user_id, username = check_login()
+
+    if request.method == 'POST' and user_id:
         name = request.form.get('name')
         surname = request.form.get('surname')
         address = request.form.get('address')
@@ -160,56 +178,89 @@ def customers():
 
         customer.new_customer(name, surname, address, city, state, zipcode, email, verbose=True)
 
-    customer_table = db.session.query(Customer).all()
+    if user_id:
+        customer_table = db.session.query(Customer).all()
 
-    return render_template('customers.html',
-                           results=customer_table)
+        return render_template('customers.html',
+                               results=customer_table)
+
+    else:
+    # User is not authenticated, redirect
+        return redirect(url_for('login'))
 
 @app.route('/delete_customer', methods=['POST'])
 def delete_customer():
-    customer_id = request.form.get('customer_id')
-    print(f"Customer ID: {customer_id}")
-    customer.remove_customer(customer_id, verbose=True)
+    user_id, username = check_login()
 
-    # Redirect to after deletion
-    return redirect('/customers')
+    if user_id:
+        customer_id = request.form.get('customer_id')
+        print(f"Customer ID: {customer_id}")
+        customer.remove_customer(customer_id, verbose=True)
+
+        # Redirect to after deletion
+        return redirect('/customers')
+    
+    else:
+    # User is not authenticated, redirect
+        return redirect(url_for('login'))
 
 @app.route('/authors', methods=['GET', 'POST'])
 def authors():
-    sort_by = request.args.get('sort_by')  # Get the sorting parameter from the query string
+    user_id, username = check_login()
 
-    # Retrieve the author table from the database
-    author_table = db.session.query(Author)
+    if user_id:
+        sort_by = request.args.get('sort_by')  # Get the sorting parameter from the query string
 
-    # Apply sorting based on the selected parameter
-    if sort_by == 'id':
-        author_table = author_table.order_by(Author.ID)
-    elif sort_by == 'name':
-        author_table = author_table.order_by(Author.name)
-    elif sort_by == 'birthdate':
-        author_table = author_table.order_by(Author.birthdate)
+        # Retrieve the author table from the database
+        author_table = db.session.query(Author)
 
-    # Execute the query and retrieve the sorted results
-    sorted_authors = author_table.all()
+        # Apply sorting based on the selected parameter
+        if sort_by == 'id':
+            author_table = author_table.order_by(Author.ID)
+        elif sort_by == 'name':
+            author_table = author_table.order_by(Author.name)
+        elif sort_by == 'birthdate':
+            author_table = author_table.order_by(Author.birthdate)
 
-    return render_template('authors.html', results=sorted_authors)
+        # Execute the query and retrieve the sorted results
+        sorted_authors = author_table.all()
+
+        return render_template('authors.html', results=sorted_authors)
+    
+    else:
+    # User is not authenticated, redirect
+        return redirect(url_for('login'))
 
 @app.route('/delete_author', methods=['POST'])
 def delete_author():
-    author_id = request.form.get('author_id')
-    print(f"Author ID: {author_id}")
-    books.remove_author(author_id, verbose=True)
+    user_id, username = check_login()
 
-    # Redirect to after deletion
-    return redirect('/authors')
+    if user_id:
+        author_id = request.form.get('author_id')
+        print(f"Author ID: {author_id}")
+        books.remove_author(author_id, verbose=True)
+
+        # Redirect to after deletion
+        return redirect('/authors')
+
+    else:
+    # User is not authenticated, redirect
+        return redirect(url_for('login'))
 
 @app.route('/search_book', methods=['GET', 'POST'])
 def search():
-    results = None
-    if request.method == 'POST':
-        search_term = request.form.get('search_term')
-        results = store_manager.search_books(search_term)
-    return render_template('search_book.html', results=results)
+    user_id, username = check_login()
+    
+    if user_id:
+        results = None
+        if request.method == 'POST':
+            search_term = request.form.get('search_term')
+            results = store_manager.search_books(search_term)
+        return render_template('search_book.html', results=results)
+    
+    else:
+    # User is not authenticated, redirect
+        return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
