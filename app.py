@@ -1,4 +1,5 @@
 from models import *
+from Scripts import author_crawler
 import os, secrets, store_manager, books, customer
 from Scripts.utils import titles_by_author, get_title, total_sales, welcome_message, drop_table
 from flask import Flask, render_template, request, redirect, session, current_app, flash, url_for
@@ -242,7 +243,6 @@ def delete_author():
 
         # Redirect to after deletion
         return redirect('/authors')
-
     else:
     # User is not authenticated, redirect
         return redirect(url_for('login'))
@@ -250,16 +250,35 @@ def delete_author():
 @app.route('/search_book', methods=['GET', 'POST'])
 def search():
     user_id, username = check_login()
-    
+
     if user_id:
         results = None
         if request.method == 'POST':
             search_term = request.form.get('search_term')
             results = store_manager.search_books(search_term)
         return render_template('search_book.html', results=results)
-    
     else:
     # User is not authenticated, redirect
+        return redirect(url_for('login'))
+
+@app.route('/author_scraper', methods=['GET', 'POST'])
+def author_scraper():
+    user_id, username = check_login()
+
+    if user_id:
+        return render_template('author_scraper.html')
+    else:
+        # User is not authenticated, redirect
+        return redirect(url_for('login'))
+
+@app.route('/start_crawler', methods=['POST'])
+def start_crawler():
+    user_id, username = check_login()
+
+    if user_id:
+        output_messages = author_crawler.crawl_wikipedia_authors()
+        return render_template('author_scraper.html', output_messages=output_messages)
+    else:
         return redirect(url_for('login'))
 
 
