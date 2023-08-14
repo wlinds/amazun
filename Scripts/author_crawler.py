@@ -1,6 +1,7 @@
 import requests, random
 from bs4 import BeautifulSoup
 import time # not used, perhaps should set delay somewhere...
+import datetime
 from flask import Flask, render_template, redirect, url_for
 
 import sys, os
@@ -87,6 +88,7 @@ def process_author_page(author_url, output_messages):
     date_of_birth = soup.find('span', {'class': 'bday'})
     if date_of_birth:
         date_of_birth = date_of_birth.text
+        print(f"Found: {datetime.datetime.now()}")
         print(f"Author: {author_name}")
         print(f"Date of Birth: {date_of_birth}")
         print(f"URL: {author_page_url}")
@@ -96,11 +98,21 @@ def process_author_page(author_url, output_messages):
         first_name = split_name[0]
         last_name = " ".join(split_name[1:])
 
+        if is_valid_date(date_of_birth) == False:
+            date_of_birth = None
+      
         output_messages.append(f"Author: {author_name}")
         output_messages.append(f"Date of Birth: {date_of_birth}")
         output_messages.append(f"URL: {author_page_url}")
         output_messages.append("------------------------")
 
-        add_author(first_name, last_name, date_of_birth, wiki=author_page_url, verbose=True)
+        add_author(first_name, last_name, date_of_birth, wiki_link=author_page_url, verbose=True)
 
     return None
+
+def is_valid_date(date_str):
+    try:
+        datetime.datetime.strptime(date_str, "%y-%m-%d")
+        return True
+    except ValueError:
+        return False

@@ -1,127 +1,178 @@
 from models import *
-import os, books, customer
-import store_manager as store
-from Scripts.utils import titles_by_author, get_title, total_sales, drop_table
-from Scripts.author_crawler import *
+import os
+import books as book_ops
+import customer as customer_ops
+import store_manager as store_ops
+from Scripts.utils import get_title, total_sales, titles_by_author
+from Scripts.author_crawler import crawl_wikipedia_authors
+from Scripts.get_books import get_books
+
+from datetime import datetime
 
 if __name__ == '__main__':
-    #main_db = 'amazun.db' #Used for SQLite
+    # main_db = 'amazun.db'  # Used for SQLite
 
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)
 
-    #drop_table('Customer')
-    #drop_table('changelog')
+    store_ops.get_dummy_stores()
+    book_ops.get_dummy_authors()
 
-    #Base.metadata.create_all(bind=engine)
+    # List of tuples containing book information
+    books_info = [
+    ('The Fellowship of the Ring', 'English', 12.99, datetime(1954, 7, 29), ['J.R.R. Tolkien'], '9780007117116', 'Fantasy'),
+    ('Harry Potter and the Sorcerer\'s Stone', 'English', 9.99, datetime(1997, 6, 26), ['J.K. Rowling'], '9780439554930', 'Fantasy'),
+    ('Foundation', 'English', 19.99, datetime(1951, 5, 1), ['Isaac Asimov'], '9780553801477', 'Science Fiction'),
+    ('Good Omens', 'English', '15.99', datetime(2015, 10, 29), ['Neil Gaiman', 'Terry Pratchett'], '9781473214712', 'Horror / Fantasy / Comedy')
+    ]
 
-    store.get_dummy_stores()
-    books.get_dummy_books()
-    books.get_dummy_authors()
-
+    # Call the function to add books to authors
+    book_ops.add_books_to_authors(books_info)
 
     # Add 200 copies of Lord of The Rings to Store 1
-    store.add_to_inventory(9780007117116, 1, 200, verbose=True)
+    store_ops.add_to_inventory('9780439554930', 1, 200, verbose=True)
 
     # Add 5000 copies of ALL existing books to store 2:
-    store.add_all_books(store_id=2, copies=5000, verbose=True)
+    store_ops.add_all_books(store_id=2, copies=5000, verbose=True)
 
-    # Add view #TODO: Missing date of birth
-    titles_by_author()
+    # Add view # TODO
 
-    # Add dummy customers
-    customer.get_dummy_cst()
-
-    # Search book
+    # Search book test
     search_title = "The"
-    results = store.search_books(search_title)
+    results = store_ops.search_books(search_title)
     print(f'Searching for books containing "{search_title}"')
 
-    for i in results:
-        print(i)
+    for data in results.values():
+        book_info = data['book_info']
 
-    # Customer book purchase
-    customer.purchase_book(9780007117116, 1, 1, 10)
-    customer.purchase_book(9780007117116, 2, 2, 1)
+        print("Book Details:")
+        print(f"Title: {book_info['title']}")
+        print(f"ISBN: {book_info['isbn']}")
+        print(f"Language: {book_info['language']}")
+        print(f"Price: {book_info['price']}")
+        print(f"Release Date: {book_info['release_date']}")
+        print(f"Genre: {book_info['genre']}")
+        print(f"Author: {book_info['author']}")
+
+        print("Available Stores and Inventory:")
+        for store_name, stock in data['stores']:
+            print(f"Store: {store_name}, Stock: {stock}")
+
+        print("=" * 30)
+
+    # Add dummy customers
+    customer_ops.get_dummy_cst()
+
+    # Purchase books test
+    customer_id = 1
+    purchase_info = [
+        ("9780007117116", 1, 2),  # ISBN, Store ID, Quantity
+        ("9780553801477", 2, 1),
+    ]
+    customer_ops.purchase_books(customer_id, purchase_info)
 
     # Move books
-    store.move_books(9780007117116, 2, 3, 1000)
-    store.move_books(9780007117116, 1, 2, 190)
-    customer.purchase_book("9780007117116", 1, 3, 3)
-    customer.purchase_book("9780007117116", 3, 3, 3)
+    store_ops.move_books('9780007117116', 2, 3, 1000)
+    store_ops.move_books('9780007117116', 1, 2, 190)
 
     print(total_sales())
 
-    # Add customer
-    customer.new_customer('Sixth Amorite King Hammurobi', 'King of the Old Babylonian Empire', 'Mušḫuššu', 'Babylon', 'Mesopotamia', 'none', 'amorite_king@anumail.com', verbose=True)
-    customer.new_customer('Anna', 'Esperanto', 'Hjortronvägen 12', 'Göteborg', 'Västa Götaland', '431 42', 'anna@example.com', verbose=True)
-    customer.new_customer('Per', 'Bolund', 'Torpdalen 12', 'Stockholm', 'Stockholms län', '111 22', 'perra@gmail.com', verbose=True)
+    # Add customers
+    customer_ops.new_customer('Sixth Amorite King Hammurobi', 'King of the Old Babylonian Empire', 'Mušḫuššu', 'Babylon', 'Mesopotamia', 'none', 'amorite_king@anumail.com', verbose=True)
+    customer_ops.new_customer('Anna', 'Esperanto', 'Hjortronvägen 12', 'Göteborg', 'Västra Götaland', '431 42', 'anna@example.com', verbose=True)
+    customer_ops.new_customer('Per', 'Bolund', 'Torpdalen 12', 'Stockholm', 'Stockholms län', '111 22', 'perra@gmail.com', verbose=True)
+
+    # Testing dupes
+    customer_ops.new_customer('Sixth Amorite King Hammurobi', 'King of the Old Babylonian Empire', 'Mušḫuššu', 'Babylon', 'Mesopotamia', 'none', 'amorite_king@anumail.com', verbose=True)
 
     # Add author
-    books.add_author('God', 'Christ', datetime(1, 1, 1), verbose=True)
+    book_ops.add_author('God', 'Christ', datetime(1, 1, 1), wiki_link='https://en.wikipedia.org/wiki/God_in_Christianity', verbose=True)
+    book_ops.add_author('God', 'Christ', datetime(1, 1, 1), wiki_link='https://en.wikipedia.org/wiki/God_in_Christianity', verbose=True)
+    book_ops.add_author('asdf', 'asdfgg', datetime(1, 1, 1), wiki_link='https://en.wikipedia.org/wiki/God_in_Christianity', verbose=True)
 
     # Add book to existence (add to book table)
-    books.add_new('Pyton for dummies', 'English', '9.99', datetime(2015, 10, 29), '25', 9781473214714, 'Educational', verbose=True)
-    store.add_to_inventory(9781473214714, 2, 200, verbose=True)
+    book_ops.add_new('Python for Dummies', 'English', '9.99', datetime(2015, 10, 29), '25', '9781473214714', 'Educational', verbose=True)
 
-    books.add_new('The Old Testament (Original)', 'English', '9.99', datetime(2015, 10, 29), '1', 9780195378405, 'Artefact', verbose=True)
-    store.add_to_inventory(9780195378405, 2, 1, verbose=True)
+    # Add book to store inventory
+    store_ops.add_to_inventory('9781473214714', 2, 200, verbose=True)
+
+    book_ops.add_new('The Old Testament (Original)', 'English', '9.99', datetime(2015, 10, 29), '1', 9780195378405, 'Artifact', verbose=True)
+    store_ops.add_to_inventory('9780195378405', 2, 1, verbose=True)
 
     # Add new store
-    store.add_store('Catholic Church', 'Vatican City', verbose=False)
-    store.move_books(9780195378405, 2, 4, 1)
+    store_ops.add_store('Catholic Church', 'Vatican City', verbose=False)
+    store_ops.move_books('9780195378405', 2, 4, 1)
 
     # Remove book
-    books.burn_book(9780195378405, verbose=True)
+    book_ops.burn_book('9780195378405', verbose=True)
 
-    # Count customer
-    all_customer = customer.get_all_customer()
-    print(f'Customers: {len(all_customer)}')
-    for customer in all_customer:
-        print(f'{customer.name} {customer.surname}')
-
-
-    # Multiple authors, (association table in models.py) TODO: Make this a function
-    books.add_new('Good Omens', 'English', '20', datetime(2015, 10, 29), '12', 9781473214712, 'Fantasy', verbose=True)
-
-    session = Session()
-    book = session.query(Books).filter_by(isbn13='9781473214712').first()
-    author1 = session.query(Author).filter_by(name='Terry', surname='Pratchett').first()
-    author2 = session.query(Author).filter_by(name='Neil', surname='Gaiman').first()
-
-    book.authors.append(author1)
-    book.authors.append(author2)
-
-    session.add(book)
-    session.commit()
+    # Count customers
+    all_customers = customer_ops.get_all_customer()
+    print(f'Customers: {len(all_customers)}')
+    for cust in all_customers:
+        print(f'{cust.first_name} {cust.last_name}')
 
     # Add book to store inventory by searching title
-    store.add_to_inventory(books.get_isbn('Good Omens'), 2, 10, verbose=True)
-    #Maybe the add_to_inventory should be modified to take either isbn or title as args instead.
+    store_ops.add_to_inventory(book_ops.get_isbn('Good Omens'), 2, 10, verbose=True)
+    # Maybe the add_to_inventory should be modified to take either isbn or title as args instead.
 
-    # ---------------------------------------------------------------------------------------------- # 
+    # Create view
+    titles_by_author()
+
+    # ---------------------------------------------------------------------------------------------- #
 
     # Find all books by author
-    books.find_all_by_author(8, verbose=True)
-    books.find_all_by_author(11, verbose=True)
-    books.find_all_by_author(1, verbose=True)
+    book_ops.find_all_by_author(8, verbose=True)
+    book_ops.find_all_by_author(11, verbose=True)
+    book_ops.find_all_by_author(10, verbose=True)
+    book_ops.find_all_by_author(1, verbose=True)
+
+    # Crawl authors (idefinitely, code below this (crawl book) won't ever run)
+
+    # authors = crawl_wikipedia_authors(max_authors=20)
+
+    # with Session() as session:
+    #     for author_info in authors:
+    #         split_name = author_info[0].split()
+    #         first_name = split_name[0]
+    #         last_name = " ".join(split_name[1:])
+    #         birthdate = author_info[1]
+    #         print(first_name, last_name, birthdate)
+    #         new_author = Author(
+    #             first_name=first_name,
+    #             last_name=last_name,
+    #             birthdate=birthdate
+    #         )
+    #         session.add(new_author)
+    #     session.commit()
 
 
-    authors = crawl_wikipedia_authors(max_authors=20)
-
+    # Crawl books
     with Session() as session:
-        for author_info in authors:
-            split_name = author_info[0].split()
-            first_name = split_name[0]
-            last_name = " ".join(split_name[1:])
-            birthdate = author_info[1]
+        try:
+            authors = session.query(Author).all()
 
-            print(first_name, last_name, birthdate)
+            for author in reversed(authors):
+                full_name = f"{author.first_name} {author.last_name}"
+                books = get_books(full_name)
 
-            new_author = Author(
-                name=first_name,
-                surname=last_name,
-                birthdate=birthdate
-            )
+                if books:
+                    for book in books:
+                        existing_book = session.query(Book).filter_by(isbn13=book["isbn"]).first()
+                        if not existing_book:
+                            new_book = Book(
+                                isbn13=book["isbn"],
+                                title=book["title"],
+                                language="English",  # You may need to adjust this value
+                                price=0.0,  # You may need to adjust this value
+                                release_date=book["publication_date"],
+                                genre=", ".join(book["genre"]) if book["genre"] else None
+                            )
+                            session.add(new_book)
+                            session.commit()
+                            print(f"Added book: {book['title']} by {full_name}")
+                else:
+                    print(f"No books found for the author '{full_name}'")
 
-            session.add(new_author)
-        session.commit()
+        finally:
+            session.close()
+

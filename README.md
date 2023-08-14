@@ -56,7 +56,9 @@ I'll have to look into this.
 
 This will create the following data structue and fill it with some pickled dummy data:
 
-![Alt text](dbschema.png)
+
+![Alt text](dbschema2.png)
+
 
 
 main.py will then continue to run the webscraper located at <code>Scripts/author_crawler.py</code> indefinitely.

@@ -1,5 +1,7 @@
 import sqlite3 # only used in validate_isbn --> remove?
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import aliased
+from sqlalchemy import text
 
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -33,73 +35,59 @@ def validate_isbn(n: str):
                + sum(int(ch) * 3 for ch in n[1::2]))
     return product % 10 == 0
 
-
-
-# Vy: ”TitlarPerFörfattare”
 def titles_by_author():
-
     session = Session()
 
     try:
-
-        view_query = text('''
-            CREATE VIEW TitlarPerFörfattare AS
-            SELECT
-                Author.Name + ' ' + Author.surname AS Namn,
-                DATEDIFF(year, Author.birthdate, GETDATE()) AS Ålder,
-                COUNT(DISTINCT CASE WHEN Books.AuthID IS NOT NULL THEN Books.title END) AS Titlar,
-                SUM(Books.price * Inventory.stock) AS Lagervärde
-            FROM
-                Author
-                JOIN Books ON Author.ID = Books.AuthID
-                JOIN Inventory ON Books.isbn13 = Inventory.isbn13
-            GROUP BY
-                Author.Name, Author.surname, Author.birthdate
+        CREATE VIEW TitlarPerFörfattare AS
+        SELECT
+            CONCAT_WS(' ', a.first_name, a.middle_name, a.last_name) AS Namn,
+            DATEDIFF(YEAR, a.birthdate, GETDATE()) AS Ålder,
+            COUNT(DISTINCT CASE WHEN ba.author_id IS NOT NULL THEN b.title END) AS Titlar,
+            SUM(b.price * i.stock) AS Lagervärde
+        FROM
+            AUTHORS AS a
+        JOIN
+            BOOK_AUTHOR_ASSOCIATION AS ba ON a.id = ba.author_id
+        JOIN
+            BOOKS AS b ON ba.book_isbn13 = b.isbn13
+        JOIN
+            INVENTORY AS i ON b.isbn13 = i.isbn13
+        GROUP BY
+            a.first_name, a.middle_name, a.last_name, a.birthdate;
         ''')
 
         # Execute the view query
         session.execute(view_query)
 
-        print("View created successfully.")
+        print("[!] View created successfully.")
     except Exception as e:
         print(f"Error creating view: {e}")
 
     session.commit()
     session.close()
 
-# Drop table OR view
-# https://www.sqlitetutorial.net/sqlite-create-view/
-
-def drop_table(name, file_name='amazun.db'):
-    conn = sqlite3.connect(file_name)
-    c = conn.cursor()
-
-    try:
-        c.execute(f"DROP TABLE {name}")
-    except sqlite3.OperationalError:
-        try:
-            c.execute(f"DROP VIEW {name}")
-        except sqlite3.OperationalError:
-            print(f"No table or view named {name} found in database.")
-
-    conn.commit()
-    conn.close()
-
-def total_sales():
+def total_sales() -> str:
     with Session() as session:
-        total_sales = session.query(func.sum(Transaction.total_cost)).scalar()
-        sales = round(total_sales)
+        total_sales = (
+            session
+            .query(func.sum(OrderDetail.total_cost))
+            .scalar()
+        )
+        
+        sales = round(total_sales or 0)
+        
         if sales < 10:
             i = "Oh.."
         elif sales == 69 or sales == 420:
             i = "Nice." 
-        elif sales > 100:
+        elif sales > 10:
             i = "Ok!"
-        elif sales > 1000:
+        elif sales > 100:
             i = "Sweet!"
-        elif sales > 10_000:
+        elif sales > 1000:
             i = "Ay caramba!"
-        elif sales > 100_000:
+        elif sales > 10_000:
             i = "Wohooo!"
         elif sales > 1_000_000:
             i = "Mr. Bezos.. We meet again."
@@ -142,5 +130,5 @@ def remove_null_rows(table_name, column_names, verbose=False):
             raise e
 
 if __name__ == '__main__':
-    update_changelog(add)
+    pass
     #remove_null_rows('Customer', ['name', 'surname', 'address', 'city', 'state', 'zipcode', 'email'])
