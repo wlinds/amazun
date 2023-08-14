@@ -43,8 +43,9 @@ def get_books(author):
             isbn = isbn_identifier[0]["identifier"] if isbn_identifier and is_valid_isbn(isbn_identifier[0]["identifier"]) else "N/A"
             genre = volume_info.get("genres", [])
 
-            if is_valid_date(publication_date) == False:
-                publication_date = None
+            if is_valid_date != None:
+                if is_valid_date(publication_date) == False:
+                    publication_date = None
 
             book = {
                 "title": title,
