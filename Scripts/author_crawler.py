@@ -94,6 +94,16 @@ def process_author_page(author_url):
         first_name = split_name[0]
         last_name = " ".join(split_name[1:])
 
+        if is_valid_date(date_of_birth) == False:
+            date_of_birth = None
+
         add_author(first_name, last_name, date_of_birth, wiki_link=author_page_url, verbose=True)
 
     return None
+
+def is_valid_date(date_str):
+    try:
+        datetime.datetime.strptime(date_str, "%y-%m-%d")
+        return True
+    except ValueError:
+        return False
