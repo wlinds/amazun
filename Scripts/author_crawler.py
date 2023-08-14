@@ -92,6 +92,6 @@ def process_author_page(author_url):
         first_name = split_name[0]
         last_name = " ".join(split_name[1:])
 
-        add_author(first_name, last_name, date_of_birth, wiki=author_page_url, verbose=True)
+        add_author(first_name, last_name, date_of_birth, wiki_link=author_page_url, verbose=True)
 
     return None
