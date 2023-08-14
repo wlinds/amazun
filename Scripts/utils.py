@@ -35,6 +35,39 @@ def validate_isbn(n: str):
                + sum(int(ch) * 3 for ch in n[1::2]))
     return product % 10 == 0
 
+def titles_by_author():
+    session = Session()
+
+    try:
+        view_query = text('''
+        CREATE VIEW TitlarPerFörfattare AS
+        SELECT
+            CONCAT_WS(' ', a.first_name, a.middle_name, a.last_name) AS Namn,
+            DATEDIFF(YEAR, a.birthdate, GETDATE()) AS Ålder,
+            COUNT(DISTINCT CASE WHEN ba.author_id IS NOT NULL THEN b.title END) AS Titlar,
+            SUM(b.price * i.stock) AS Lagervärde
+        FROM
+            AUTHORS AS a
+        JOIN
+            BOOK_AUTHOR_ASSOCIATION AS ba ON a.id = ba.author_id
+        JOIN
+            BOOKS AS b ON ba.book_isbn13 = b.isbn13
+        JOIN
+            INVENTORY AS i ON b.isbn13 = i.isbn13
+        GROUP BY
+            a.first_name, a.middle_name, a.last_name, a.birthdate;
+        ''')
+
+        # Execute the view query
+        session.execute(view_query)
+
+        print("[!] View created successfully.")
+    except Exception as e:
+        print(f"Error creating view: {e}")
+
+    session.commit()
+    session.close()
+
 def total_sales() -> str:
     with Session() as session:
         total_sales = (
