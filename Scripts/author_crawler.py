@@ -2,6 +2,7 @@ import requests, random
 from bs4 import BeautifulSoup
 import time # not used, perhaps should set delay somewhere...
 import datetime
+from flask import Flask, render_template, redirect, url_for
 
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -12,10 +13,13 @@ from books import add_author
 
 # TODO: Check max_author, as it seem to go on past given limit.
 
-def crawl_wikipedia_authors(category_url='https://en.wikipedia.org/wiki/Category:Writers', subcategory_hierarchy=[], max_authors=100):
-    return crawl_category(category_url, subcategory_hierarchy, max_authors=max_authors)
+def crawl_wikipedia_authors():
+    output_messages = []
+    crawl_category('https://en.wikipedia.org/wiki/Category:Writers', output_messages)
+    return output_messages
 
-def crawl_category(category_url, subcategory_hierarchy=[], max_authors=100):
+
+def crawl_category(category_url, output_messages, subcategory_hierarchy=[], max_authors=100):
     base_url = 'https://en.wikipedia.org'
     authors = []
     author_count = 0
@@ -51,7 +55,7 @@ def crawl_category(category_url, subcategory_hierarchy=[], max_authors=100):
 
         # Process each author page
         for author_url in author_urls:
-            author_info = process_author_page(author_url)
+            author_info = process_author_page(author_url, output_messages)
             if author_info:
                 authors.append(author_info)
                 author_count += 1
@@ -61,7 +65,7 @@ def crawl_category(category_url, subcategory_hierarchy=[], max_authors=100):
 
     return authors
 
-def process_author_page(author_url):
+def process_author_page(author_url, output_messages):
     author_page_url = 'https://en.wikipedia.org' + author_url
 
     # Send a request to the author page
@@ -96,6 +100,11 @@ def process_author_page(author_url):
 
         if is_valid_date(date_of_birth) == False:
             date_of_birth = None
+      
+        output_messages.append(f"Author: {author_name}")
+        output_messages.append(f"Date of Birth: {date_of_birth}")
+        output_messages.append(f"URL: {author_page_url}")
+        output_messages.append("------------------------")
 
         add_author(first_name, last_name, date_of_birth, wiki_link=author_page_url, verbose=True)
 

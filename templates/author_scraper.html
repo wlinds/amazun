@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Author Scraper</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+
+    <style>
+        .output-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: scroll;
+        }
+    </style>
+
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block content %}
+    <h1>Author Scraper</h1>
+    <form action="{{ url_for('start_crawler') }}" method="post">
+        <button type="submit">Start Crawler</button>
+    </form>
+    
+    <div class="output-box">
+        {% for message in output_messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+
+    {% endblock %}
+</body>
+</html>

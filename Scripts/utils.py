@@ -39,7 +39,6 @@ def titles_by_author():
     session = Session()
 
     try:
-        view_query = text('''
         CREATE VIEW TitlarPerFörfattare AS
         SELECT
             CONCAT_WS(' ', a.first_name, a.middle_name, a.last_name) AS Namn,

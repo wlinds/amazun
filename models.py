@@ -3,6 +3,7 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.dialects.mssql import DATETIME2
 from sqlalchemy.orm import clear_mappers # debugging
 from my_credentials import cstring2
+from datetime import datetime
 
 # Define database connection
 # This has to be created first using Azure Data Studio or similar, maybe possible to do with sqlalchemy straight away, idk.
