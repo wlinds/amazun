@@ -3,11 +3,19 @@ import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dateutil.parser import parse as parse_date
+import datetime
 
-def is_valid_isbn(isbn):
+def is_valid_isbn(isbn): # very lazy check but it'll do
     if len(isbn) == 13:
         return True
     return False
+
+def is_valid_date(date_str): # also lazy
+    try:
+        datetime.datetime.strptime(date_str, "%y-%m-%d")
+        return True
+    except ValueError:
+        return False
 
 def get_books(author):
     """Finds books by the given author using the Google Books API."""
@@ -35,9 +43,8 @@ def get_books(author):
             isbn = isbn_identifier[0]["identifier"] if isbn_identifier and is_valid_isbn(isbn_identifier[0]["identifier"]) else "N/A"
             genre = volume_info.get("genres", [])
 
-            if publication_date and len(publication_date) < 8: # Hot fix: If day of release not in public date, don't register it
+            if is_valid_date(publication_date) == False:
                 publication_date = None
-
 
             book = {
                 "title": title,
