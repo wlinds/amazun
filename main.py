@@ -3,7 +3,7 @@ import os
 import books as book_operations
 import customer as customer_ops
 import store_manager as store_ops
-from Scripts.utils import get_title, total_sales
+from Scripts.utils import get_title, total_sales, titles_by_author
 from Scripts.author_crawler import crawl_wikipedia_authors
 
 from datetime import datetime
@@ -113,6 +113,9 @@ if __name__ == '__main__':
     # Add book to store inventory by searching title
     store_ops.add_to_inventory(book_operations.get_isbn('Good Omens'), 2, 10, verbose=True)
     # Maybe the add_to_inventory should be modified to take either isbn or title as args instead.
+
+    # Create view
+    titles_by_author()
 
     # ---------------------------------------------------------------------------------------------- #
 
