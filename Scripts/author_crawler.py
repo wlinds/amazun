@@ -1,6 +1,7 @@
 import requests, random
 from bs4 import BeautifulSoup
 import time # not used, perhaps should set delay somewhere...
+import datetime
 
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -83,6 +84,7 @@ def process_author_page(author_url):
     date_of_birth = soup.find('span', {'class': 'bday'})
     if date_of_birth:
         date_of_birth = date_of_birth.text
+        print(f"Found: {datetime.datetime.now()}")
         print(f"Author: {author_name}")
         print(f"Date of Birth: {date_of_birth}")
         print(f"URL: {author_page_url}")
